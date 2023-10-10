@@ -5,14 +5,7 @@ from homeassistant.helpers import entity_registry as er
 
 from .conftest import setup_platform
 from .const import FAKE_SCENE
-
-
-def assert_none(entity, neg=False):
-    """Assert none helper."""
-    if neg:
-        assert entity is not None
-    else:
-        assert entity is None
+from .utils import assert_none
 
 
 async def assert_scene_attributes(
