@@ -23,12 +23,12 @@ from homeassistant.const import (
     UnitOfPressure,
     UnitOfTemperature,
 )
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeController, ZWaveMeEntity
-from .const import DOMAIN, ZWaveMePlatform
+from .const import ZWaveMePlatform
+from .helpers import setup_entry
 
 
 @dataclass
@@ -119,23 +119,15 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-
-    @callback
-    def add_new_device(new_device: ZWaveMeData) -> None:
-        controller: ZWaveMeController = hass.data[DOMAIN][config_entry.entry_id]
-        description = SENSORS_MAP.get(new_device.probeType, SENSORS_MAP["generic"])
-        sensor = ZWaveMeSensor(controller, new_device, description)
-
-        async_add_entities(
-            [
-                sensor,
-            ]
-        )
-
-    config_entry.async_on_unload(
-        async_dispatcher_connect(
-            hass, f"ZWAVE_ME_NEW_{DEVICE_NAME.upper()}", add_new_device
-        )
+    setup_entry(
+        hass,
+        config_entry,
+        async_add_entities,
+        DEVICE_NAME,
+        ZWaveMeSensor,
+        lambda new_device: [
+            SENSORS_MAP.get(new_device.probeType, SENSORS_MAP["generic"]),
+        ],
     )
 
 

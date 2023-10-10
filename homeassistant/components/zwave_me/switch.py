@@ -8,12 +8,12 @@ from homeassistant.components.switch import (
     SwitchEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeEntity
-from .const import DOMAIN, ZWaveMePlatform
+from .const import ZWaveMePlatform
+from .helpers import setup_entry
 
 _LOGGER = logging.getLogger(__name__)
 DEVICE_NAME = ZWaveMePlatform.SWITCH
@@ -32,22 +32,15 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the switch platform."""
-
-    @callback
-    def add_new_device(new_device):
-        controller = hass.data[DOMAIN][config_entry.entry_id]
-        switch = ZWaveMeSwitch(controller, new_device, SWITCH_MAP["generic"])
-
-        async_add_entities(
-            [
-                switch,
-            ]
-        )
-
-    config_entry.async_on_unload(
-        async_dispatcher_connect(
-            hass, f"ZWAVE_ME_NEW_{DEVICE_NAME.upper()}", add_new_device
-        )
+    setup_entry(
+        hass,
+        config_entry,
+        async_add_entities,
+        DEVICE_NAME,
+        ZWaveMeSwitch,
+        lambda new_device: [
+            SWITCH_MAP["generic"],
+        ],
     )
 
 

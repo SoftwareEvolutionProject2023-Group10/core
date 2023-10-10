@@ -3,12 +3,12 @@ from typing import Any
 
 from homeassistant.components.siren import SirenEntity, SirenEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeEntity
-from .const import DOMAIN, ZWaveMePlatform
+from .const import ZWaveMePlatform
+from .helpers import setup_entry
 
 DEVICE_NAME = ZWaveMePlatform.SIREN
 
@@ -19,23 +19,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the siren platform."""
-
-    @callback
-    def add_new_device(new_device):
-        controller = hass.data[DOMAIN][config_entry.entry_id]
-        siren = ZWaveMeSiren(controller, new_device)
-
-        async_add_entities(
-            [
-                siren,
-            ]
-        )
-
-    config_entry.async_on_unload(
-        async_dispatcher_connect(
-            hass, f"ZWAVE_ME_NEW_{DEVICE_NAME.upper()}", add_new_device
-        )
-    )
+    setup_entry(hass, config_entry, async_add_entities, DEVICE_NAME, ZWaveMeSiren)
 
 
 class ZWaveMeSiren(ZWaveMeEntity, SirenEntity):
