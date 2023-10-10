@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import async_get
 
 from .conftest import create_mock_bridge, setup_platform
+from .utils import assert_length
 
 from tests.common import async_capture_events, async_fire_time_changed
 
@@ -317,20 +318,11 @@ def assert_sensor_state(hass, entity_id, expected_state, expected_name):
     assert sensor.name == expected_name
 
 
-def assert_length(checker, length):
-    """Assert the length of a sequence.
-
-    Example:
-        Assert that the length of `checker` is equal to `length`.
-    """
-    assert len(checker) == length
-
-
 async def test_no_sensors(hass: HomeAssistant, mock_bridge_v1) -> None:
     """Test the update_items function when no sensors are found."""
     add_sensor_response(mock_bridge_v1, {})
     await setup_hue_platform(hass, mock_bridge_v1, ["binary_sensor", "sensor"])
-    assert_length(mock_bridge_v1.mock_request, 1)
+    assert_length(mock_bridge_v1.mock_requests, 1)
     assert_length(hass.states.async_all(), 0)
 
 
