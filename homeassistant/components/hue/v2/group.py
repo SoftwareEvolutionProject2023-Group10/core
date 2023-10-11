@@ -44,7 +44,7 @@ async def async_setup_entry(
     api: HueBridgeV2 = bridge.api
 
     @callback
-    def async_add_light(event_type: EventType, resource: GroupedLight) -> None:
+    def async_add_light(resource: GroupedLight) -> None:
         """Add Grouped Light for Hue Room/Zone."""
         group = api.groups.grouped_light.get_zone(resource.id)
         if group is None:

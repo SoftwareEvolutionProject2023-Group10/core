@@ -41,7 +41,7 @@ async def async_setup_entry(
     @callback
     def register_items(controller: ControllerType, sensor_class: SensorType):
         @callback
-        def async_add_sensor(event_type: EventType, resource: SensorType) -> None:
+        def async_add_sensor(resource: SensorType) -> None:
             """Add Hue Binary Sensor."""
             async_add_entities([sensor_class(bridge, controller, resource)])
 

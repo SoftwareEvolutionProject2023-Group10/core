@@ -119,7 +119,7 @@ def _get_hue_event_from_device_id(hass, device_id):
 
 
 async def async_validate_trigger_config(
-    bridge: HueBridge, device_entry: DeviceEntry, config: ConfigType
+    device_entry: DeviceEntry, config: ConfigType
 ) -> ConfigType:
     """Validate config."""
     config = TRIGGER_SCHEMA(config)
@@ -175,7 +175,7 @@ async def async_attach_trigger(
 
 
 @callback
-def async_get_triggers(bridge: HueBridge, device: DeviceEntry) -> list[dict[str, str]]:
+def async_get_triggers(device: DeviceEntry) -> list[dict[str, str]]:
     """Return device triggers for device on `v1` bridge.
 
     Make sure device is a supported remote model.

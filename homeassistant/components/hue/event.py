@@ -38,7 +38,6 @@ async def async_setup_entry(
     # add entities for all button and relative rotary resources
     @callback
     def async_add_entity(
-        event_type: EventType,
         resource: Button | RelativeRotary,
     ) -> None:
         """Add entity from Hue resource."""

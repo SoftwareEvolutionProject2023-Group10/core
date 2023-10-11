@@ -51,7 +51,7 @@ async def async_setup_entry(
     controller: LightsController = api.lights
 
     @callback
-    def async_add_light(event_type: EventType, resource: Light) -> None:
+    def async_add_light(resource: Light) -> None:
         """Add Hue Light."""
         light = HueLight(bridge, controller, resource)
         async_add_entities([light])
