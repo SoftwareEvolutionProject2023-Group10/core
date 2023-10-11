@@ -7,7 +7,8 @@ from homeassistant.components.zwave_me.const import DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult, FlowResultType
 
-from .const import ASYNC_SETUP_ENTRY_FUNCTION, GET_UUID_FUNCTION
+from .const import ASYNC_SETUP_ENTRY_FUNCTION, FAKE_UUID
+from .helpers import patch_uuid
 
 from tests.common import MockConfigEntry
 
@@ -32,10 +33,7 @@ async def test_form(hass: HomeAssistant) -> None:
     with patch(
         ASYNC_SETUP_ENTRY_FUNCTION,
         return_value=True,
-    ) as mock_setup_entry, patch(
-        GET_UUID_FUNCTION,
-        return_value="test_uuid",
-    ):
+    ) as mock_setup_entry, patch_uuid():
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -64,10 +62,7 @@ async def test_zeroconf(hass: HomeAssistant) -> None:
     with patch(
         ASYNC_SETUP_ENTRY_FUNCTION,
         return_value=True,
-    ) as mock_setup_entry, patch(
-        GET_UUID_FUNCTION,
-        return_value="test_uuid",
-    ):
+    ) as mock_setup_entry, patch_uuid():
         result: FlowResult = await hass.config_entries.flow.async_init(
             DOMAIN,
             context={"source": config_entries.SOURCE_ZEROCONF},
@@ -95,7 +90,7 @@ async def test_zeroconf(hass: HomeAssistant) -> None:
 
 async def test_error_handling_zeroconf(hass: HomeAssistant) -> None:
     """Test getting proper errors from no uuid."""
-    with patch(GET_UUID_FUNCTION, return_value=None):
+    with patch_uuid(return_value=None):
         result: FlowResult = await hass.config_entries.flow.async_init(
             DOMAIN,
             context={"source": config_entries.SOURCE_ZEROCONF},
@@ -107,7 +102,7 @@ async def test_error_handling_zeroconf(hass: HomeAssistant) -> None:
 
 async def test_handle_error_user(hass: HomeAssistant) -> None:
     """Test getting proper errors from no uuid."""
-    with patch(GET_UUID_FUNCTION, return_value=None):
+    with patch_uuid(return_value=None):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -132,13 +127,10 @@ async def test_duplicate_user(hass: HomeAssistant) -> None:
             "url": "ws://192.168.1.15",
             "token": "test-token",
         },
-        unique_id="test_uuid",
+        unique_id=FAKE_UUID,
     )
     entry.add_to_hass(hass)
-    with patch(
-        GET_UUID_FUNCTION,
-        return_value="test_uuid",
-    ):
+    with patch_uuid():
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -164,14 +156,11 @@ async def test_duplicate_zeroconf(hass: HomeAssistant) -> None:
             "url": "ws://192.168.1.14",
             "token": "test-token",
         },
-        unique_id="test_uuid",
+        unique_id=FAKE_UUID,
     )
     entry.add_to_hass(hass)
 
-    with patch(
-        GET_UUID_FUNCTION,
-        return_value="test_uuid",
-    ):
+    with patch_uuid():
         result: FlowResult = await hass.config_entries.flow.async_init(
             DOMAIN,
             context={"source": config_entries.SOURCE_ZEROCONF},
