@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeController, ZWaveMeEntity
-from .const import GENERIC, ZWaveMePlatform
+from .const import GENERIC, ON, ZWaveMePlatform
 from .helpers import setup_entry
 
 BINARY_SENSORS_MAP: dict[str, BinarySensorEntityDescription] = {
@@ -62,4 +62,4 @@ class ZWaveMeBinarySensor(ZWaveMeEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Return the state of the sensor."""
-        return self.device.level == "on"
+        return self.device.level == ON

@@ -9,6 +9,10 @@ DOMAIN = "zwave_me"
 # most used probeType
 GENERIC = "generic"
 
+# Device levels
+ON = "on"
+OFF = "off"
+
 
 class ZWaveMePlatform(StrEnum):
     """Included ZWaveMe platforms."""

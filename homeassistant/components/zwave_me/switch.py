@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeEntity
-from .const import GENERIC, ZWaveMePlatform
+from .const import GENERIC, OFF, ON, ZWaveMePlatform
 from .helpers import setup_entry
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,12 +55,12 @@ class ZWaveMeSwitch(ZWaveMeEntity, SwitchEntity):
     @property
     def is_on(self) -> bool:
         """Return the state of the switch."""
-        return self.device.level == "on"
+        return self.device.level == ON
 
     def turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
-        self.controller.zwave_api.send_command(self.device.id, "on")
+        self.controller.zwave_api.send_command(self.device.id, ON)
 
     def turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
-        self.controller.zwave_api.send_command(self.device.id, "off")
+        self.controller.zwave_api.send_command(self.device.id, OFF)

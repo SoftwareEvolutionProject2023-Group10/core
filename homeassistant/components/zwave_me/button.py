@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeEntity
-from .const import ZWaveMePlatform
+from .const import ON, ZWaveMePlatform
 from .helpers import setup_entry
 
 DEVICE_NAME = ZWaveMePlatform.BUTTON
@@ -25,4 +25,4 @@ class ZWaveMeButton(ZWaveMeEntity, ButtonEntity):
 
     def press(self) -> None:
         """Turn the entity on."""
-        self.controller.zwave_api.send_command(self.device.id, "on")
+        self.controller.zwave_api.send_command(self.device.id, ON)
