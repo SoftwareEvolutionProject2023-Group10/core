@@ -130,7 +130,7 @@ class ClusterHandler(LogMixin):
     # Dict of attributes to read on cluster handler initialization.
     # Dict keys -- attribute ID or names, with bool value indicating whether a cached
     # attribute read is acceptable.
-    ZCL_INIT_ATTRS: dict[str, bool] = {}
+    zcl_init_attrs: dict[str, bool] = {}
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize ClusterHandler."""
@@ -371,8 +371,8 @@ class ClusterHandler(LogMixin):
             return
 
         self.debug("initializing cluster handler: from_cache: %s", from_cache)
-        cached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if cached]
-        uncached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if not cached]
+        cached = [a for a, cached in self.zcl_init_attrs.items() if cached]
+        uncached = [a for a, cached in self.zcl_init_attrs.items() if not cached]
         uncached.extend([cfg["attr"] for cfg in self.REPORT_CONFIG])
 
         if cached:

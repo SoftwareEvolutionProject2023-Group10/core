@@ -61,7 +61,7 @@ class AnalogOutput(ClusterHandler):
     REPORT_CONFIG = (
         AttrReportConfig(attr="present_value", config=REPORT_CONFIG_DEFAULT),
     )
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "min_present_value": True,
         "max_present_value": True,
         "resolution": True,
@@ -155,14 +155,14 @@ class BasicClusterHandler(ClusterHandler):
         """Initialize Basic cluster handler."""
         super().__init__(cluster, endpoint)
         if is_hue_motion_sensor(self) and self.cluster.endpoint.endpoint_id == 2:
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["trigger_indicator"] = True
+            self.zcl_init_attrs = self.zcl_init_attrs.copy()
+            self.zcl_init_attrs["trigger_indicator"] = True
         elif (
             self.cluster.endpoint.manufacturer == "TexasInstruments"
             and self.cluster.endpoint.model == "ti.router"
         ):
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["transmit_power"] = True
+            self.zcl_init_attrs = self.zcl_init_attrs.copy()
+            self.zcl_init_attrs["transmit_power"] = True
 
 
 @registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(general.BinaryInput.cluster_id)
@@ -252,7 +252,7 @@ class LevelControlClusterHandler(ClusterHandler):
 
     CURRENT_LEVEL = 0
     REPORT_CONFIG = (AttrReportConfig(attr="current_level", config=REPORT_CONFIG_ASAP),)
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "on_off_transition_time": True,
         "on_level": True,
         "on_transition_time": True,
@@ -338,7 +338,7 @@ class OnOffClusterHandler(ClusterHandler):
 
     ON_OFF = general.OnOff.attributes_by_name["on_off"].id
     REPORT_CONFIG = (AttrReportConfig(attr="on_off", config=REPORT_CONFIG_IMMEDIATE),)
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "start_up_on_off": True,
     }
 
@@ -362,12 +362,12 @@ class OnOffClusterHandler(ClusterHandler):
         except KeyError:
             return
 
-        self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-        self.ZCL_INIT_ATTRS["backlight_mode"] = True
-        self.ZCL_INIT_ATTRS["power_on_state"] = True
+        self.zcl_init_attrs = self.zcl_init_attrs.copy()
+        self.zcl_init_attrs["backlight_mode"] = True
+        self.zcl_init_attrs["power_on_state"] = True
 
         if self.cluster.endpoint.model == "TS011F":
-            self.ZCL_INIT_ATTRS["child_lock"] = True
+            self.zcl_init_attrs["child_lock"] = True
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:

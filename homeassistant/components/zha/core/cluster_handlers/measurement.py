@@ -67,8 +67,8 @@ class OccupancySensing(ClusterHandler):
         """Initialize Occupancy cluster handler."""
         super().__init__(cluster, endpoint)
         if is_hue_motion_sensor(self):
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["sensitivity"] = True
+            self.zcl_init_attrs = self.zcl_init_attrs.copy()
+            self.zcl_init_attrs["sensitivity"] = True
 
 
 @registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
