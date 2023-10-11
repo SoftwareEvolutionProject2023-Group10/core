@@ -12,6 +12,8 @@ from .helpers import patch_uuid
 
 from tests.common import MockConfigEntry
 
+FAKE_TOKEN = "test_token"
+
 FAKE_IP = "192.168.1.14"
 WRONG_FAKE_IP = "192.168.1.15"
 FAKE_WS = f"ws://{FAKE_IP}"
@@ -46,7 +48,7 @@ async def test_form(hass: HomeAssistant) -> None:
             result["flow_id"],
             {
                 "url": FAKE_IP,
-                "token": "test-token",
+                "token": FAKE_TOKEN,
             },
         )
         await hass.async_block_till_done()
@@ -55,7 +57,7 @@ async def test_form(hass: HomeAssistant) -> None:
     assert result2["title"] == FAKE_WS
     assert result2["data"] == {
         "url": FAKE_WS,
-        "token": "test-token",
+        "token": FAKE_TOKEN,
     }
     assert len(mock_setup_entry.mock_calls) == 1
 
@@ -77,7 +79,7 @@ async def test_zeroconf(hass: HomeAssistant) -> None:
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "token": "test-token",
+                "token": FAKE_TOKEN,
             },
         )
         await hass.async_block_till_done()
@@ -86,7 +88,7 @@ async def test_zeroconf(hass: HomeAssistant) -> None:
     assert result2["title"] == FAKE_WS
     assert result2["data"] == {
         "url": FAKE_WS,
-        "token": "test-token",
+        "token": FAKE_TOKEN,
     }
     assert len(mock_setup_entry.mock_calls) == 1
 
@@ -115,7 +117,7 @@ async def test_handle_error_user(hass: HomeAssistant) -> None:
             result["flow_id"],
             {
                 "url": WRONG_FAKE_IP,
-                "token": "test-token",
+                "token": FAKE_TOKEN,
             },
         )
         assert result2["errors"] == {"base": "no_valid_uuid_set"}
@@ -128,7 +130,7 @@ async def test_duplicate_user(hass: HomeAssistant) -> None:
         title="ZWave_me",
         data={
             "url": FAKE_WS,
-            "token": "test-token",
+            "token": FAKE_TOKEN,
         },
         unique_id=FAKE_UUID,
     )
@@ -143,7 +145,7 @@ async def test_duplicate_user(hass: HomeAssistant) -> None:
             result["flow_id"],
             {
                 "url": FAKE_IP,
-                "token": "test-token",
+                "token": FAKE_TOKEN,
             },
         )
         assert result2["type"] == FlowResultType.ABORT
@@ -157,7 +159,7 @@ async def test_duplicate_zeroconf(hass: HomeAssistant) -> None:
         title="ZWave_me",
         data={
             "url": FAKE_WS,
-            "token": "test-token",
+            "token": FAKE_TOKEN,
         },
         unique_id=FAKE_UUID,
     )
