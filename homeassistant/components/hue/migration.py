@@ -82,7 +82,8 @@ async def handle_v2_migration(hass: core.HomeAssistant, entry: ConfigEntry) -> N
     # Create mapping of mac address to HA device id's.
     # Identifier in dev reg should be mac-address,
     # but in some cases it has a postfix like `-0b` or `-01`.
-    dev_ids = {}
+    dev_ids = build_device_ids(dev_reg, entry.entry_id)
+
     for hass_dev in devices_for_config_entries(dev_reg, entry.entry_id):
         for domain, mac in hass_dev.identifiers:
             if domain != DOMAIN:
@@ -216,3 +217,15 @@ async def handle_v2_migration(hass: core.HomeAssistant, entry: ConfigEntry) -> N
                     ent.entity_id,
                 )
     LOGGER.info("Migration of devices and entities to support API schema 2 finished")
+
+
+def build_device_ids(device_reg, entry_id):
+    """Build a mapping of mac address to HA device id's."""
+    dev_ids = {}
+    for hass_dev in devices_for_config_entries(device_reg, entry_id):
+        for domain, mac in hass_dev.identifiers:
+            if domain != DOMAIN:
+                continue
+            normalized_mac = mac.split("-")[0]
+            dev_ids[normalized_mac] = hass_dev.id
+    return dev_ids
