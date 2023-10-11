@@ -6,6 +6,7 @@ import pytest
 from zwave_me_ws import ZWaveMeData
 
 from homeassistant.components.zwave_me import ZWaveMePlatform
+from homeassistant.components.zwave_me.const import DOMAIN
 from homeassistant.const import CONF_TOKEN, CONF_URL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
@@ -43,14 +44,14 @@ async def test_remove_stale_devices(
 
     config_entry = MockConfigEntry(
         unique_id=uuid.uuid4(),
-        domain="zwave_me",
+        domain=DOMAIN,
         data={CONF_TOKEN: "test_token", CONF_URL: "http://test_test"},
     )
     config_entry.add_to_hass(hass)
     device_registry.async_get_or_create(
         config_entry_id=config_entry.entry_id,
         connections={("mac", "12:34:56:AB:CD:EF")},
-        identifiers={("zwave_me", f"{config_entry.unique_id}-{identifier}")},
+        identifiers={(DOMAIN, f"{config_entry.unique_id}-{identifier}")},
     )
     with patch(
         f"{MODULE_NAME}.ZWaveMe.get_connection",
@@ -64,7 +65,7 @@ async def test_remove_stale_devices(
             device_registry.async_get_device(
                 identifiers={
                     (
-                        "zwave_me",
+                        DOMAIN,
                         f"{config_entry.unique_id}-{identifier}",
                     )
                 }
