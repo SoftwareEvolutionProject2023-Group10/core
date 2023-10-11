@@ -27,7 +27,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeController, ZWaveMeEntity
-from .const import ZWaveMePlatform
+from .const import GENERIC, ZWaveMePlatform
 from .helpers import setup_entry
 
 
@@ -106,8 +106,8 @@ SENSORS_MAP: dict[str, ZWaveMeSensorEntityDescription] = {
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
     ),
-    "generic": ZWaveMeSensorEntityDescription(
-        key="generic",
+    GENERIC: ZWaveMeSensorEntityDescription(
+        key=GENERIC,
     ),
 }
 DEVICE_NAME = ZWaveMePlatform.SENSOR
@@ -126,7 +126,7 @@ async def async_setup_entry(
         DEVICE_NAME,
         ZWaveMeSensor,
         lambda new_device: [
-            SENSORS_MAP.get(new_device.probeType, SENSORS_MAP["generic"]),
+            SENSORS_MAP.get(new_device.probeType, SENSORS_MAP[GENERIC]),
         ],
     )
 

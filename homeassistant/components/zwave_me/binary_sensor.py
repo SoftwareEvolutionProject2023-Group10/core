@@ -13,12 +13,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeController, ZWaveMeEntity
-from .const import ZWaveMePlatform
+from .const import GENERIC, ZWaveMePlatform
 from .helpers import setup_entry
 
 BINARY_SENSORS_MAP: dict[str, BinarySensorEntityDescription] = {
-    "generic": BinarySensorEntityDescription(
-        key="generic",
+    GENERIC: BinarySensorEntityDescription(
+        key=GENERIC,
     ),
     "motion": BinarySensorEntityDescription(
         key="motion",
@@ -41,7 +41,7 @@ async def async_setup_entry(
         DEVICE_NAME,
         ZWaveMeBinarySensor,
         lambda new_device: [
-            BINARY_SENSORS_MAP.get(new_device.probeType, BINARY_SENSORS_MAP["generic"]),
+            BINARY_SENSORS_MAP.get(new_device.probeType, BINARY_SENSORS_MAP[GENERIC]),
         ],
     )
 

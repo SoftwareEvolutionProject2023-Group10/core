@@ -12,15 +12,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ZWaveMeEntity
-from .const import ZWaveMePlatform
+from .const import GENERIC, ZWaveMePlatform
 from .helpers import setup_entry
 
 _LOGGER = logging.getLogger(__name__)
 DEVICE_NAME = ZWaveMePlatform.SWITCH
 
 SWITCH_MAP: dict[str, SwitchEntityDescription] = {
-    "generic": SwitchEntityDescription(
-        key="generic",
+    GENERIC: SwitchEntityDescription(
+        key=GENERIC,
         device_class=SwitchDeviceClass.SWITCH,
     )
 }
@@ -39,7 +39,7 @@ async def async_setup_entry(
         DEVICE_NAME,
         ZWaveMeSwitch,
         lambda new_device: [
-            SWITCH_MAP["generic"],
+            SWITCH_MAP[GENERIC],
         ],
     )
 

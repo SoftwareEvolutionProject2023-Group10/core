@@ -6,6 +6,9 @@ from homeassistant.const import Platform
 # Base component constants
 DOMAIN = "zwave_me"
 
+# most used probeType
+GENERIC = "generic"
+
 
 class ZWaveMePlatform(StrEnum):
     """Included ZWaveMe platforms."""
