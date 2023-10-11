@@ -27,7 +27,7 @@ ATTR_IN_CLUSTERS: Final[str] = "input_clusters"
 ATTR_OUT_CLUSTERS: Final[str] = "output_clusters"
 
 _LOGGER = logging.getLogger(__name__)
-CALLABLE_T = TypeVar("CALLABLE_T", bound=Callable)
+CallableT = TypeVar("CallableT", bound=Callable)
 
 
 class Endpoint:
@@ -196,7 +196,7 @@ class Endpoint:
     def async_new_entity(
         self,
         platform: Platform | str,
-        entity_class: CALLABLE_T,
+        entity_class: CallableT,
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
     ) -> None:
