@@ -219,6 +219,11 @@ async def handle_v2_migration(hass: core.HomeAssistant, entry: ConfigEntry) -> N
     LOGGER.info("Migration of devices and entities to support API schema 2 finished")
 
 
+###
+# Support functions.
+###
+
+
 def build_device_ids(device_reg, entry_id):
     """Build a mapping of mac address to HA device id's."""
     dev_ids = {}
