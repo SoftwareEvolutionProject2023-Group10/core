@@ -10,6 +10,8 @@ from homeassistant.const import CONF_TOKEN, CONF_URL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
+from .const import MODULE_NAME
+
 from tests.common import MockConfigEntry
 
 DEFAULT_DEVICE_INFO = ZWaveMeData(
@@ -51,10 +53,10 @@ async def test_remove_stale_devices(
         identifiers={("zwave_me", f"{config_entry.unique_id}-{identifier}")},
     )
     with patch(
-        "homeassistant.components.zwave_me.ZWaveMe.get_connection",
+        f"{MODULE_NAME}.ZWaveMe.get_connection",
         mock_connection,
     ), patch(
-        "homeassistant.components.zwave_me.async_setup_platforms",
+        f"{MODULE_NAME}.async_setup_platforms",
     ):
         await hass.config_entries.async_setup(config_entry.entry_id)
     assert (
