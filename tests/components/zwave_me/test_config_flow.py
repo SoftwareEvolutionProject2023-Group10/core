@@ -12,11 +12,14 @@ from .helpers import patch_uuid
 
 from tests.common import MockConfigEntry
 
+FAKE_IP = "192.168.1.14"
+WRONG_FAKE_IP = "192.168.1.15"
+FAKE_WS = f"ws://{FAKE_IP}"
 MOCK_ZEROCONF_DATA = zeroconf.ZeroconfServiceInfo(
-    host="ws://192.168.1.14",
+    host=FAKE_WS,
     hostname="mock_hostname",
     name="mock_name",
-    addresses=["192.168.1.14"],
+    addresses=[FAKE_IP],
     port=1234,
     properties={
         "deviceid": "aa:bb:cc:dd:ee:ff",
@@ -42,16 +45,16 @@ async def test_form(hass: HomeAssistant) -> None:
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "url": "192.168.1.14",
+                "url": FAKE_IP,
                 "token": "test-token",
             },
         )
         await hass.async_block_till_done()
 
     assert result2["type"] == FlowResultType.CREATE_ENTRY
-    assert result2["title"] == "ws://192.168.1.14"
+    assert result2["title"] == FAKE_WS
     assert result2["data"] == {
-        "url": "ws://192.168.1.14",
+        "url": FAKE_WS,
         "token": "test-token",
     }
     assert len(mock_setup_entry.mock_calls) == 1
@@ -80,9 +83,9 @@ async def test_zeroconf(hass: HomeAssistant) -> None:
         await hass.async_block_till_done()
 
     assert result2["type"] == FlowResultType.CREATE_ENTRY
-    assert result2["title"] == "ws://192.168.1.14"
+    assert result2["title"] == FAKE_WS
     assert result2["data"] == {
-        "url": "ws://192.168.1.14",
+        "url": FAKE_WS,
         "token": "test-token",
     }
     assert len(mock_setup_entry.mock_calls) == 1
@@ -111,7 +114,7 @@ async def test_handle_error_user(hass: HomeAssistant) -> None:
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "url": "192.168.1.15",
+                "url": WRONG_FAKE_IP,
                 "token": "test-token",
             },
         )
@@ -124,7 +127,7 @@ async def test_duplicate_user(hass: HomeAssistant) -> None:
         domain=DOMAIN,
         title="ZWave_me",
         data={
-            "url": "ws://192.168.1.15",
+            "url": FAKE_WS,
             "token": "test-token",
         },
         unique_id=FAKE_UUID,
@@ -139,7 +142,7 @@ async def test_duplicate_user(hass: HomeAssistant) -> None:
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "url": "192.168.1.15",
+                "url": FAKE_IP,
                 "token": "test-token",
             },
         )
@@ -153,7 +156,7 @@ async def test_duplicate_zeroconf(hass: HomeAssistant) -> None:
         domain=DOMAIN,
         title="ZWave_me",
         data={
-            "url": "ws://192.168.1.14",
+            "url": FAKE_WS,
             "token": "test-token",
         },
         unique_id=FAKE_UUID,
