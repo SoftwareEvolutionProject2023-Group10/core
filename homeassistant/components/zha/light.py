@@ -113,7 +113,7 @@ class BaseLight(LogMixin, light.LightEntity):
     """Operations common to all light entities."""
 
     _FORCE_ON = False
-    _DEFAULT_MIN_TRANSITION_TIME: float = 0
+    _default_min_transition_time: float = 0
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
@@ -126,7 +126,7 @@ class BaseLight(LogMixin, light.LightEntity):
         self._attr_state: bool | None
         self._off_with_transition: bool = False
         self._off_brightness: int | None = None
-        self._zha_config_transition = self._DEFAULT_MIN_TRANSITION_TIME
+        self._zha_config_transition = self._default_min_transition_time
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
         self._zha_config_always_prefer_xy_color_mode: bool = True
@@ -184,7 +184,7 @@ class BaseLight(LogMixin, light.LightEntity):
             transition if transition is not None else self._zha_config_transition
         ) or (
             # if 0 is passed in some devices still need the minimum default
-            self._DEFAULT_MIN_TRANSITION_TIME
+            self._default_min_transition_time
         )
         brightness = kwargs.get(light.ATTR_BRIGHTNESS)
         effect = kwargs.get(light.ATTR_EFFECT)
@@ -194,7 +194,7 @@ class BaseLight(LogMixin, light.LightEntity):
         hs_color = kwargs.get(light.ATTR_HS_COLOR)
 
         execute_if_off_supported = (
-            self._GROUP_SUPPORTS_EXECUTE_IF_OFF
+            self._group_supports_execute_if_off
             if isinstance(self, LightGroup)
             else self._color_cluster_handler
             and self._color_cluster_handler.execute_if_off_supported
@@ -295,7 +295,7 @@ class BaseLight(LogMixin, light.LightEntity):
             # After that, we set it to the desired color/temperature with no transition.
             result = await self._level_cluster_handler.move_to_level_with_on_off(
                 level=DEFAULT_MIN_BRIGHTNESS,
-                transition_time=int(10 * self._DEFAULT_MIN_TRANSITION_TIME),
+                transition_time=int(10 * self._default_min_transition_time),
             )
             t_log["move_to_level_with_on_off"] = result
             if result[1] is not Status.SUCCESS:
@@ -449,7 +449,7 @@ class BaseLight(LogMixin, light.LightEntity):
         supports_level = brightness_supported(self._attr_supported_color_modes)
 
         transition_time = (
-            transition or self._DEFAULT_MIN_TRANSITION_TIME
+            transition or self._default_min_transition_time
             if transition is not None
             else DEFAULT_ON_OFF_TRANSITION
         ) + DEFAULT_EXTRA_TRANSITION_DELAY_SHORT
@@ -464,7 +464,7 @@ class BaseLight(LogMixin, light.LightEntity):
             result = await self._level_cluster_handler.move_to_level_with_on_off(
                 level=0,
                 transition_time=int(
-                    10 * (transition or self._DEFAULT_MIN_TRANSITION_TIME)
+                    10 * (transition or self._default_min_transition_time)
                 ),
             )
         else:
@@ -503,7 +503,7 @@ class BaseLight(LogMixin, light.LightEntity):
         """Process ZCL color commands."""
 
         transition_time = (
-            self._DEFAULT_MIN_TRANSITION_TIME
+            self._default_min_transition_time
             if new_color_provided_while_off
             else duration
         )
@@ -1093,7 +1093,7 @@ class MinTransitionLight(Light):
     _attr_name: str = "Light"
 
     # Transitions are counted in 1/10th of a second increments, so this is the smallest
-    _DEFAULT_MIN_TRANSITION_TIME = 0.1
+    _default_min_transition_time = 0.1
 
 
 @GROUP_MATCH()
@@ -1112,14 +1112,14 @@ class LightGroup(BaseLight, ZhaGroupEntity):
         super().__init__(entity_ids, unique_id, group_id, zha_device, **kwargs)
         group = self.zha_device.gateway.get_group(self._group_id)
 
-        self._GROUP_SUPPORTS_EXECUTE_IF_OFF = True
+        self._group_supports_execute_if_off = True
 
         for member in group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
             if member.device.manufacturer in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
-                self._DEFAULT_MIN_TRANSITION_TIME = (
-                    MinTransitionLight._DEFAULT_MIN_TRANSITION_TIME
+                self._default_min_transition_time = (
+                    MinTransitionLight._default_min_transition_time
                 )
 
             # Check all group members to see if they support execute_if_off.
@@ -1131,7 +1131,7 @@ class LightGroup(BaseLight, ZhaGroupEntity):
                         cluster_handler.name == CLUSTER_HANDLER_COLOR
                         and not cluster_handler.execute_if_off_supported
                     ):
-                        self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
+                        self._group_supports_execute_if_off = False
                         break
 
         self._on_off_cluster_handler = group.endpoint[OnOff.cluster_id]
