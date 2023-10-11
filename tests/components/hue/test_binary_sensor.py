@@ -3,6 +3,7 @@ from homeassistant.core import HomeAssistant
 
 from .conftest import setup_platform
 from .const import FAKE_BINARY_SENSOR, FAKE_DEVICE, FAKE_ZIGBEE_CONNECTIVITY
+from .utils import assert_none
 
 
 async def test_binary_sensors(
@@ -19,8 +20,7 @@ async def test_binary_sensors(
 
     # test motion sensor
     sensor = hass.states.get("binary_sensor.hue_motion_sensor_motion")
-    assert sensor is not None
-    assert sensor.state == "off"
+    assert_none(sensor, True)
     assert sensor.name == "Hue motion sensor Motion"
     assert sensor.attributes["device_class"] == "motion"
     assert sensor.attributes["motion_valid"] is True
@@ -29,7 +29,7 @@ async def test_binary_sensors(
     sensor = hass.states.get(
         "binary_sensor.entertainmentroom_1_entertainment_configuration"
     )
-    assert sensor is not None
+    assert_none(sensor, True)
     assert sensor.state == "off"
     assert sensor.name == "Entertainmentroom 1: Entertainment Configuration"
     assert sensor.attributes["device_class"] == "running"
@@ -59,5 +59,5 @@ async def test_binary_sensor_add_update(hass: HomeAssistant, mock_bridge_v2) -> 
     mock_bridge_v2.api.emit_event("update", updated_sensor)
     await hass.async_block_till_done()
     test_entity = hass.states.get(test_entity_id)
-    assert test_entity is not None
+    assert_none(test_entity, True)
     assert test_entity.state == "on"

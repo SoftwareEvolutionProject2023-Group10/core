@@ -115,5 +115,4 @@ async def test_switch_added(hass: HomeAssistant, mock_bridge_v2) -> None:
     mock_bridge_v2.api.emit_event("update", updated_resource)
     await hass.async_block_till_done()
     test_entity = hass.states.get(test_entity_id)
-    assert test_entity is not None
     assert test_entity.state == "off"

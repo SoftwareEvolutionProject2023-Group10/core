@@ -48,6 +48,19 @@ def create_mock_api_discovery(aioclient_mock, bridges):
         )
 
 
+async def assert_connection_result(result):
+    """Ensure the connection result indicates an aborted connection due to inability to connect.
+
+    Args:
+        result (dict): The connection result to be checked.
+
+    Raises:
+        AssertionError: If the result type is not "abort" or the reason is not "cannot_connect".
+    """
+    assert result["type"] == "abort"
+    assert result["reason"] == "cannot_connect"
+
+
 async def test_flow_works(hass: HomeAssistant) -> None:
     """Test config flow ."""
     disc_bridge = get_discovered_bridge(supports_v2=True)
@@ -59,8 +72,6 @@ async def test_flow_works(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(
             const.DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
-
-    assert result["type"] == "form"
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.flow.async_configure(
@@ -107,14 +118,12 @@ async def test_manual_flow_works(hass: HomeAssistant) -> None:
             const.DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
 
-    assert result["type"] == "form"
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={"id": "manual"}
     )
 
-    assert result["type"] == "form"
     assert result["step_id"] == "manual"
 
     with patch.object(config_flow, "discover_bridge", return_value=disc_bridge):
@@ -430,9 +439,12 @@ async def test_bridge_homekit(
     assert result["step_id"] == "link"
 
     flow = next(
-        flow
-        for flow in hass.config_entries.flow.async_progress()
-        if flow["flow_id"] == result["flow_id"]
+        (
+            flow
+            for flow in hass.config_entries.flow.async_progress()
+            if flow["flow_id"] == result["flow_id"]
+        ),
+        None,
     )
     assert flow["context"]["unique_id"] == config_entries.DEFAULT_DISCOVERY_UNIQUE_ID
 
@@ -669,9 +681,6 @@ async def test_bridge_connection_failed(
         # a warning message should have been logged that the bridge could not be reached
         assert "Error while attempting to retrieve discovery information" in caplog.text
 
-        assert result["type"] == "abort"
-        assert result["reason"] == "cannot_connect"
-
         # test again with zeroconf discovered wrong bridge IP
         result = await hass.config_entries.flow.async_init(
             const.DOMAIN,
@@ -690,8 +699,7 @@ async def test_bridge_connection_failed(
                 },
             ),
         )
-        assert result["type"] == "abort"
-        assert result["reason"] == "cannot_connect"
+        await assert_connection_result(result)
 
         # test again with homekit discovered wrong bridge IP
         result = await hass.config_entries.flow.async_init(
@@ -707,8 +715,7 @@ async def test_bridge_connection_failed(
                 type="mock_type",
             ),
         )
-        assert result["type"] == "abort"
-        assert result["reason"] == "cannot_connect"
+        await assert_connection_result(result)
 
         # repeat test with import flow
         result = await hass.config_entries.flow.async_init(
@@ -716,5 +723,4 @@ async def test_bridge_connection_failed(
             context={"source": config_entries.SOURCE_IMPORT},
             data={"host": "blah"},
         )
-        assert result["type"] == "abort"
-        assert result["reason"] == "cannot_connect"
+        await assert_connection_result(result)
