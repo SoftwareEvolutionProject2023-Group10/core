@@ -10,10 +10,24 @@ from homeassistant.setup import async_setup_component
 
 from .conftest import setup_platform
 from .test_sensor_v1 import HUE_DIMMER_REMOTE_1, HUE_TAP_REMOTE_1
+from .utils import assert_length
 
 from tests.common import async_get_device_automations
 
 REMOTES_RESPONSE = {"7": HUE_TAP_REMOTE_1, "8": HUE_DIMMER_REMOTE_1}
+
+
+async def assert_triggers(expected_triggers, triggers):
+    """Ensure that the given triggers match the expected triggers.
+
+    Args:
+        expected_triggers (list): The expected list of triggers.
+        triggers (list): The actual list of triggers to be checked.
+
+    Raises:
+        AssertionError: If the two lists do not match (ignoring order).
+    """
+    assert triggers == unordered(expected_triggers)
 
 
 async def test_get_triggers(
@@ -46,7 +60,7 @@ async def test_get_triggers(
         }
         for t_type, t_subtype in device_trigger.HUE_TAP_REMOTE
     ]
-    assert triggers == unordered(expected_triggers)
+    await assert_triggers(expected_triggers, triggers)
 
     # Get triggers for specific dimmer switch
     hue_dimmer_device = device_reg.async_get_device(
@@ -81,7 +95,7 @@ async def test_get_triggers(
             for t_type, t_subtype in device_trigger.HUE_DIMMER_REMOTE
         ),
     ]
-    assert triggers == unordered(expected_triggers)
+    await assert_triggers(expected_triggers, triggers)
 
 
 async def test_if_fires_on_state_change(
@@ -166,4 +180,4 @@ async def test_if_fires_on_state_change(
     await mock_bridge_v1.sensor_manager.coordinator.async_refresh()
     await hass.async_block_till_done()
     assert len(mock_bridge_v1.mock_requests) == 3
-    assert len(calls) == 1
+    assert_length(calls, 1)

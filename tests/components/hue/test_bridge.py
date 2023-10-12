@@ -16,6 +16,8 @@ from homeassistant.components.hue.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from tests.components.hue.utils import assert_length
+
 
 async def test_bridge_setup_v1(hass: HomeAssistant, mock_api_v1) -> None:
     """Test a successful setup for V1 bridge."""
@@ -116,8 +118,8 @@ async def test_reset_unloads_entry_if_setup(hass: HomeAssistant, mock_api_v1) ->
     ) as mock_forward:
         assert await hue_bridge.async_reset()
 
-    assert len(mock_forward.mock_calls) == 3
-    assert len(hass.services.async_services()) == 0
+    assert_length(mock_forward.mock_calls, 3)
+    assert_length(hass.services.async_services(), 0)
 
 
 async def test_handle_unauthorized(hass: HomeAssistant, mock_api_v1) -> None:

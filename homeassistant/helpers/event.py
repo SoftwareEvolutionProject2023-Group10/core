@@ -917,7 +917,6 @@ class TrackTemplateResultInfo:
 
     def async_setup(
         self,
-        raise_on_template_error: bool,
         strict: bool = False,
         log_fn: Callable[[int, str], None] | None = None,
     ) -> None:
@@ -955,8 +954,6 @@ class TrackTemplateResultInfo:
             )
 
             if info.exception:
-                if raise_on_template_error:
-                    raise info.exception
                 if not log_fn:
                     _LOGGER.error(
                         "Error while processing template: %s",
@@ -1239,7 +1236,6 @@ def async_track_template_result(
     hass: HomeAssistant,
     track_templates: Sequence[TrackTemplate],
     action: TrackTemplateResultListener,
-    raise_on_template_error: bool = False,
     strict: bool = False,
     log_fn: Callable[[int, str], None] | None = None,
     has_super_template: bool = False,
@@ -1266,11 +1262,6 @@ def async_track_template_result(
         An iterable of TrackTemplate.
     action
         Callable to call with results.
-    raise_on_template_error
-        When set to True, if there is an exception
-        processing the template during setup, the system
-        will raise the exception instead of setting up
-        tracking.
     strict
         When set to True, raise on undefined variables.
     log_fn
@@ -1286,7 +1277,7 @@ def async_track_template_result(
 
     """
     tracker = TrackTemplateResultInfo(hass, track_templates, action, has_super_template)
-    tracker.async_setup(raise_on_template_error, strict=strict, log_fn=log_fn)
+    tracker.async_setup(strict=strict, log_fn=log_fn)
     return tracker
 
 
@@ -1444,13 +1435,6 @@ def async_track_point_in_utc_time(
 track_point_in_utc_time = threaded_listener_factory(async_track_point_in_utc_time)
 
 
-def _run_async_call_action(
-    hass: HomeAssistant, job: HassJob[[datetime], Coroutine[Any, Any, None] | None]
-) -> None:
-    """Run action."""
-    hass.async_run_hass_job(job, time_tracker_utcnow())
-
-
 @callback
 @bind_hass
 def async_call_at(
@@ -1460,12 +1444,26 @@ def async_call_at(
     loop_time: float,
 ) -> CALLBACK_TYPE:
     """Add a listener that is called at <loop_time>."""
+
+    @callback
+    def run_action(job: HassJob[[datetime], Coroutine[Any, Any, None] | None]) -> None:
+        """Call the action."""
+        hass.async_run_hass_job(job, time_tracker_utcnow())
+
     job = (
         action
         if isinstance(action, HassJob)
         else HassJob(action, f"call_at {loop_time}")
     )
-    return hass.loop.call_at(loop_time, _run_async_call_action, hass, job).cancel
+    cancel_callback = hass.loop.call_at(loop_time, run_action, job)
+
+    @callback
+    def unsub_call_later_listener() -> None:
+        """Cancel the call_later."""
+        assert cancel_callback is not None
+        cancel_callback.cancel()
+
+    return unsub_call_later_listener
 
 
 @callback
@@ -1479,13 +1477,26 @@ def async_call_later(
     """Add a listener that is called in <delay>."""
     if isinstance(delay, timedelta):
         delay = delay.total_seconds()
+
+    @callback
+    def run_action(job: HassJob[[datetime], Coroutine[Any, Any, None] | None]) -> None:
+        """Call the action."""
+        hass.async_run_hass_job(job, time_tracker_utcnow())
+
     job = (
         action
         if isinstance(action, HassJob)
         else HassJob(action, f"call_later {delay}")
     )
-    loop = hass.loop
-    return loop.call_at(loop.time() + delay, _run_async_call_action, hass, job).cancel
+    cancel_callback = hass.loop.call_at(hass.loop.time() + delay, run_action, job)
+
+    @callback
+    def unsub_call_later_listener() -> None:
+        """Cancel the call_later."""
+        assert cancel_callback is not None
+        cancel_callback.cancel()
+
+    return unsub_call_later_listener
 
 
 call_later = threaded_listener_factory(async_call_later)

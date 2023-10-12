@@ -5,6 +5,7 @@ from homeassistant.helpers import entity_registry as er
 
 from .conftest import setup_platform
 from .const import FAKE_DEVICE, FAKE_LIGHT, FAKE_ZIGBEE_CONNECTIVITY
+from .utils import assert_length, assert_none
 
 
 async def test_lights(
@@ -97,7 +98,7 @@ async def test_light_turn_on_service(
     )
 
     # PUT request should have been sent to device with correct params
-    assert len(mock_bridge_v2.mock_requests) == 1
+    assert_length(mock_bridge_v2.mock_requests, 1)
     assert mock_bridge_v2.mock_requests[0]["method"] == "put"
     assert mock_bridge_v2.mock_requests[0]["json"]["on"]["on"] is True
     assert mock_bridge_v2.mock_requests[0]["json"]["dimming"]["brightness"] == 100
@@ -252,7 +253,7 @@ async def test_light_turn_off_service(
         {"entity_id": test_light_id, "transition": 0.25},
         blocking=True,
     )
-    assert len(mock_bridge_v2.mock_requests) == 2
+    assert_length(mock_bridge_v2.mock_requests, 2)
     assert mock_bridge_v2.mock_requests[1]["json"]["on"]["on"] is False
     assert mock_bridge_v2.mock_requests[1]["json"]["dynamics"]["duration"] == 200
 
@@ -273,7 +274,7 @@ async def test_light_turn_off_service(
         {"entity_id": test_light_id, "flash": "short"},
         blocking=True,
     )
-    assert len(mock_bridge_v2.mock_requests) == 4
+    assert_length(mock_bridge_v2.mock_requests, 4)
     assert mock_bridge_v2.mock_requests[3]["json"]["identify"]["action"] == "identify"
 
 
@@ -311,7 +312,7 @@ async def test_light_availability(
 
     # verify entity does exist and is available before we start
     test_light = hass.states.get(test_light_id)
-    assert test_light is not None
+    assert_none(test_light, True)
     assert test_light.state == "on"
 
     # Change availability by modififying the zigbee_connectivity status
@@ -350,7 +351,7 @@ async def test_grouped_lights(
 
     # test light created for hue zone
     test_entity = hass.states.get("light.test_zone")
-    assert test_entity is not None
+    assert_none(test_entity, True)
     assert test_entity.attributes["friendly_name"] == "Test Zone"
     assert test_entity.state == "on"
     assert test_entity.attributes["brightness"] == 119
@@ -444,7 +445,7 @@ async def test_grouped_lights(
     )
 
     # PUT request should have been sent to ONLY the grouped_light resource with correct params
-    assert len(mock_bridge_v2.mock_requests) == 1
+    assert_length(mock_bridge_v2.mock_requests, 1)
     assert mock_bridge_v2.mock_requests[0]["method"] == "put"
     assert mock_bridge_v2.mock_requests[0]["json"]["on"]["on"] is False
 
@@ -460,7 +461,7 @@ async def test_grouped_lights(
 
     # the light should now be off
     test_light = hass.states.get(test_light_id)
-    assert test_light is not None
+    assert_none(test_light, True)
     assert test_light.state == "off"
 
     # Test calling the turn off service on a grouped light with transition
@@ -477,7 +478,7 @@ async def test_grouped_lights(
     )
 
     # PUT request should have been sent to group_light with correct params
-    assert len(mock_bridge_v2.mock_requests) == 1
+    assert_length(mock_bridge_v2.mock_requests, 1)
     assert mock_bridge_v2.mock_requests[0]["json"]["on"]["on"] is False
     assert mock_bridge_v2.mock_requests[0]["json"]["dynamics"]["duration"] == 200
 
@@ -516,7 +517,7 @@ async def test_grouped_lights(
     )
 
     # PUT request should have been sent to grouped_light with correct params
-    assert len(mock_bridge_v2.mock_requests) == 1
+    assert_length(mock_bridge_v2.mock_requests, 1)
     assert mock_bridge_v2.mock_requests[0]["json"]["alert"]["action"] == "breathe"
 
     # Test sending flash effect in turn_off call
@@ -533,7 +534,7 @@ async def test_grouped_lights(
     )
 
     # PUT request should have been sent to ALL group lights with correct params
-    assert len(mock_bridge_v2.mock_requests) == 3
+    assert_length(mock_bridge_v2.mock_requests, 3)
     for index in range(0, 3):
         assert (
             mock_bridge_v2.mock_requests[index]["json"]["identify"]["action"]
