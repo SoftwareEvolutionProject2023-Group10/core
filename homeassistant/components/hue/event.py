@@ -53,7 +53,7 @@ async def async_setup_entry(
     for controller in (api.sensors.button, api.sensors.relative_rotary):
         # add all current items in controller
         for item in controller:
-            async_add_entity(EventType.RESOURCE_ADDED, item)
+            async_add_entity(item)
 
         # register listener for new items only
         config_entry.async_on_unload(
