@@ -91,7 +91,7 @@ class TuyaClusterHandler(ClusterHandler):
             "_TZE200_k6jhsr0q",
             "_TZE200_9mahtqtg",
         ):
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "backlight_mode": True,
                 "power_on_state": True,
             }
@@ -108,30 +108,30 @@ class OppleRemote(ClusterHandler):
         """Initialize Opple cluster handler."""
         super().__init__(cluster, endpoint)
         if self.cluster.endpoint.model == "lumi.motion.ac02":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "detection_interval": True,
                 "motion_sensitivity": True,
                 "trigger_indicator": True,
             }
         elif self.cluster.endpoint.model == "lumi.motion.agl04":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "detection_interval": True,
                 "motion_sensitivity": True,
             }
         elif self.cluster.endpoint.model == "lumi.motion.ac01":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "presence": True,
                 "monitoring_mode": True,
                 "motion_sensitivity": True,
                 "approach_distance": True,
             }
         elif self.cluster.endpoint.model in ("lumi.plug.mmeu01", "lumi.plug.maeu01"):
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "power_outage_memory": True,
                 "consumer_connected": True,
             }
         elif self.cluster.endpoint.model == "aqara.feeder.acn001":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "portions_dispensed": True,
                 "weight_dispensed": True,
                 "error_detected": True,
@@ -142,7 +142,7 @@ class OppleRemote(ClusterHandler):
                 "portion_weight": True,
             }
         elif self.cluster.endpoint.model == "lumi.airrtc.agl001":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "system_mode": True,
                 "preset": True,
                 "window_detection": True,
@@ -156,7 +156,7 @@ class OppleRemote(ClusterHandler):
                 "sensor": True,
             }
         elif self.cluster.endpoint.model == "lumi.sensor_smoke.acn03":
-            self.ZCL_INIT_ATTRS = {
+            self.zcl_init_attrs = {
                 "buzzer_manual_mute": True,
                 "smoke_density": True,
                 "heartbeat_indicator": True,
@@ -241,7 +241,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
     """Inovelli Configuration Entity cluster handler."""
 
     REPORT_CONFIG = ()
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "dimming_speed_up_remote": True,
         "dimming_speed_up_local": True,
         "ramp_rate_off_to_on_local": True,

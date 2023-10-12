@@ -94,7 +94,7 @@ class Metering(ClusterHandler):
         ),
         AttrReportConfig(attr="status", config=REPORT_CONFIG_ASAP),
     )
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "demand_formatting": True,
         "divisor": True,
         "metering_device_type": True,
