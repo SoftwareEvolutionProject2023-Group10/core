@@ -59,7 +59,7 @@ async def async_setup_entry(
 
         # add all current items in controller
         for sensor in controller:
-            async_add_sensor(EventType.RESOURCE_ADDED, sensor)
+            async_add_sensor(sensor)
 
         # register listener for new sensors
         config_entry.async_on_unload(

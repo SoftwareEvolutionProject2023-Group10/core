@@ -54,7 +54,7 @@ async def async_setup_entry(
 
     # add current items
     for item in api.groups.grouped_light.items:
-        async_add_light(EventType.RESOURCE_ADDED, item)
+        async_add_light(item)
 
     # register listener for new grouped_light
     config_entry.async_on_unload(

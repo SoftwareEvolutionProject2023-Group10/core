@@ -58,7 +58,7 @@ async def async_setup_entry(
 
     # add all current items in controller
     for light in controller:
-        async_add_light(EventType.RESOURCE_ADDED, resource=light)
+        async_add_light(light)
 
     # register listener for new lights
     config_entry.async_on_unload(

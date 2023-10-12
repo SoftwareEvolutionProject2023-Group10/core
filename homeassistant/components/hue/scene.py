@@ -54,7 +54,7 @@ async def async_setup_entry(
 
     # add all current items in controller
     for item in api.scenes:
-        async_add_entity(EventType.RESOURCE_ADDED, item)
+        async_add_entity(item)
 
     # register listener for new items only
     config_entry.async_on_unload(
