@@ -76,7 +76,6 @@ async def async_attach_trigger(
     )
 
 
-@callback
 def async_get_triggers(
     bridge: HueBridge, device_entry: DeviceEntry
 ) -> list[dict[str, Any]]:

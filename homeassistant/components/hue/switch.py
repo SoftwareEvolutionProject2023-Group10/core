@@ -43,7 +43,7 @@ async def async_setup_entry(
     @callback
     def register_items(controller: ControllerType):
         @callback
-        def async_add_entity(resource: SensingService) -> None:
+        def async_add_entity(event_type: EventType, resource: SensingService) -> None:
             """Add entity from Hue resource."""
             async_add_entities(
                 [HueSensingServiceEnabledEntity(bridge, controller, resource)]
@@ -51,7 +51,7 @@ async def async_setup_entry(
 
         # add all current items in controller
         for item in controller:
-            async_add_entity(item)
+            async_add_entity(EventType.RESOURCE_ADDED, item)
 
         # register listener for new items only
         config_entry.async_on_unload(

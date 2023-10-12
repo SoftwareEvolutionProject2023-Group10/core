@@ -18,7 +18,7 @@ from homeassistant.const import (
     CONF_TYPE,
     CONF_UNIQUE_ID,
 )
-from homeassistant.core import CALLBACK_TYPE, callback
+from homeassistant.core import CALLBACK_TYPE
 from homeassistant.helpers.device_registry import DeviceEntry
 from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
@@ -174,7 +174,6 @@ async def async_attach_trigger(
     )
 
 
-@callback
 def async_get_triggers(device: DeviceEntry) -> list[dict[str, str]]:
     """Return device triggers for device on `v1` bridge.
 

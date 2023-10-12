@@ -65,7 +65,7 @@ async def async_setup_hue_events(bridge: "HueBridge"):
     )
 
     @callback
-    def handle_rotary_event(hue_resource: RelativeRotary) -> None:
+    def handle_rotary_event(evt_type: EventType, hue_resource: RelativeRotary) -> None:
         """Handle event from Hue relative_rotary resource controller."""
         LOGGER.debug("Received relative_rotary event: %s", hue_resource)
 

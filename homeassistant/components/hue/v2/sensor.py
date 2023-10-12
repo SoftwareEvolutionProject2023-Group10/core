@@ -53,13 +53,13 @@ async def async_setup_entry(
     @callback
     def register_items(controller: ControllerType, sensor_class: SensorType):
         @callback
-        def async_add_sensor(resource: SensorType) -> None:
+        def async_add_sensor(event_type: EventType, resource: SensorType) -> None:
             """Add Hue Sensor."""
             async_add_entities([sensor_class(bridge, controller, resource)])
 
         # add all current items in controller
         for sensor in controller:
-            async_add_sensor(sensor)
+            async_add_sensor(EventType.RESOURCE_ADDED, sensor)
 
         # register listener for new sensors
         config_entry.async_on_unload(

@@ -74,9 +74,7 @@ async def async_attach_trigger(
             return await async_attach_trigger_v1(
                 bridge, device_entry, config, action, trigger_info
             )
-        return await async_attach_trigger_v2(
-            bridge, config, action, trigger_info
-        )
+        return await async_attach_trigger_v2(bridge, config, action, trigger_info)
     raise InvalidDeviceAutomationConfig(
         f"Device ID {device_id} is not found on any Hue bridge"
     )
