@@ -48,8 +48,8 @@ async def async_validate_trigger_config(
             continue
         bridge: HueBridge = hass.data[DOMAIN][conf_entry_id]
         if bridge.api_version == 1:
-            return await async_validate_trigger_config_v1(bridge, device_entry, config)
-        return await async_validate_trigger_config_v2(bridge, device_entry, config)
+            return await async_validate_trigger_config_v1(device_entry, config)
+        return await async_validate_trigger_config_v2(config)
     return config
 
 
@@ -75,7 +75,7 @@ async def async_attach_trigger(
                 bridge, device_entry, config, action, trigger_info
             )
         return await async_attach_trigger_v2(
-            bridge, device_entry, config, action, trigger_info
+            bridge, config, action, trigger_info
         )
     raise InvalidDeviceAutomationConfig(
         f"Device ID {device_id} is not found on any Hue bridge"
@@ -101,6 +101,6 @@ async def async_get_triggers(
         bridge: HueBridge = hass.data[DOMAIN][conf_entry_id]
 
         if bridge.api_version == 1:
-            return async_get_triggers_v1(bridge, device_entry)
+            return async_get_triggers_v1(device_entry)
         return async_get_triggers_v2(bridge, device_entry)
     return []

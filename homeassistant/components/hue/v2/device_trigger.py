@@ -46,8 +46,6 @@ TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
 
 
 async def async_validate_trigger_config(
-    bridge: HueBridge,
-    device_entry: DeviceEntry,
     config: ConfigType,
 ) -> ConfigType:
     """Validate config."""
@@ -56,7 +54,6 @@ async def async_validate_trigger_config(
 
 async def async_attach_trigger(
     bridge: HueBridge,
-    device_entry: DeviceEntry,
     config: ConfigType,
     action: TriggerActionType,
     trigger_info: TriggerInfo,
