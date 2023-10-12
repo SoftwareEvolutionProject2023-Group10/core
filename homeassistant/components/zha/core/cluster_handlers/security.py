@@ -336,7 +336,7 @@ class IasWd(ClusterHandler):
 class IASZoneClusterHandler(ClusterHandler):
     """Cluster handler for the IASZone Zigbee cluster."""
 
-    ZCL_INIT_ATTRS = {"zone_status": False, "zone_state": True, "zone_type": True}
+    zcl_init_attrs = {"zone_status": False, "zone_state": True, "zone_type": True}
 
     @callback
     def cluster_command(self, tsn, command_id, args):

@@ -75,7 +75,7 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         AttrReportConfig(attr="ac_frequency", config=REPORT_CONFIG_OP),
         AttrReportConfig(attr="ac_frequency_max", config=REPORT_CONFIG_DEFAULT),
     )
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "ac_current_divisor": True,
         "ac_current_multiplier": True,
         "ac_power_divisor": True,

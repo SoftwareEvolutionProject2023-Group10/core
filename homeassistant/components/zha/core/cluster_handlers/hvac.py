@@ -39,7 +39,7 @@ class FanClusterHandler(ClusterHandler):
     _value_attribute = 0
 
     REPORT_CONFIG = (AttrReportConfig(attr="fan_mode", config=REPORT_CONFIG_OP),)
-    ZCL_INIT_ATTRS = {"fan_mode_sequence": True}
+    zcl_init_attrs = {"fan_mode_sequence": True}
 
     @property
     def fan_mode(self) -> int | None:
@@ -102,7 +102,7 @@ class ThermostatClusterHandler(ClusterHandler):
         AttrReportConfig(attr="pi_cooling_demand", config=REPORT_CONFIG_CLIMATE_DEMAND),
         AttrReportConfig(attr="pi_heating_demand", config=REPORT_CONFIG_CLIMATE_DEMAND),
     )
-    ZCL_INIT_ATTRS: dict[str, bool] = {
+    zcl_init_attrs: dict[str, bool] = {
         "abs_min_heat_setpoint_limit": True,
         "abs_max_heat_setpoint_limit": True,
         "abs_min_cool_setpoint_limit": True,

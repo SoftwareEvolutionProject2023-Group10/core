@@ -38,7 +38,7 @@ class ColorClusterHandler(ClusterHandler):
     )
     MAX_MIREDS: int = 500
     MIN_MIREDS: int = 153
-    ZCL_INIT_ATTRS = {
+    zcl_init_attrs = {
         "color_mode": False,
         "color_temp_physical_min": True,
         "color_temp_physical_max": True,
