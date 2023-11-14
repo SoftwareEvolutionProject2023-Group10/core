@@ -5,6 +5,8 @@ import asyncio
 from collections.abc import Callable
 import logging
 
+import voluptuous as vol
+
 from homeassistant import config as conf_util
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -57,8 +59,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         hass.bus.async_fire(f"event_{DOMAIN}_reloaded", context=call.context)
 
+    async def _weather_service_call(call: Event | ServiceCall):
+        weather_type = call.data["main"]
+
+        hass.bus.async_fire(
+            f"event for {DOMAIN} - Weather service - ",
+            event_data={"main": weather_type},
+            context=call.context,
+        )
+
     async_register_admin_service(hass, DOMAIN, SERVICE_RELOAD, _reload_config)
 
+    hass.services.async_register(
+        domain=DOMAIN,
+        service="weather_service",
+        service_func=_weather_service_call,
+        schema=vol.Schema(
+            {
+                vol.Required("main"): str,
+            }
+        ),
+    )
     return True
 
 
