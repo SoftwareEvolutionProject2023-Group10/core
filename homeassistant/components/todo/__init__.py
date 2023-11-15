@@ -1,44 +1,68 @@
 """Support for the Philips Hue system."""
 
 from datetime import datetime, timedelta
-from homeassistant.components.light import LightEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
-from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import ConfigType
+
+from homeassistant.const import EVENT_STATE_CHANGED
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.event import async_track_state_change_event, EventStateChangedData
+from homeassistant.helpers.typing import ConfigType, EventType
+
 
 def weather_to_color(weather) -> str | None:
-    print("calculating light color")
+    print("calculating light color based on weather")
     print(weather.state)
     if weather.state == "cloudy":
         return (255, 0, 0)
     else:
         return None
 
+def song_to_color(song_title: str) -> str | None:
+    print("calculating light color based on song_title")
+    print(song_title)
+    if song_title == "Mirchi":
+        return (255, 0, 0)
+    else:
+        return None
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    async def update_lights(time: datetime) -> None:
-        weather = hass.states.get("weather.forecast_home")
-
-        color = weather_to_color(weather)
+    def change_color(color: tuple[int, int, int] | None) -> None:
         print(color)
-
         if color is None:
-            await hass.services.async_call(
+            hass.add_job(
+                hass.services.async_call,
                 "light",
                 "turn_off",
-                {"entity_id": "light." + config["todo"]["light_id"]}
+                {"entity_id": config["todo"]["light_id"]},
             )
         else:
-            await hass.services.async_call(
+            hass.add_job(
+                hass.services.async_call,
                 "light",
                 "turn_on",
-                {"entity_id": "light." + config["todo"]["light_id"], "rgb_color": color}
+                {
+                    "entity_id": config["todo"]["light_id"],
+                    "rgb_color": color,
+                },
             )
-        pass
 
-    async_track_time_interval(hass, update_lights, timedelta(seconds=15))
+    @callback
+    def update_lights_weather(event: EventType[EventStateChangedData]) -> None:
+        weather = event.data["new_state"]
+        color = weather_to_color(weather)
+        change_color(color)
 
-    print("----------------------------- async_setup()")
+    @callback
+    def update_lights_music(event: EventType[EventStateChangedData]) -> None:
+        print("music changed")
+        song = event.data["new_state"].attributes.get("media_title")
+        if song is None:
+            color = None
+        else:
+            color = song_to_color(song)
+        change_color(color)
+
+    async_track_state_change_event(hass, ["weather.forecast_home"], update_lights_weather)
+    async_track_state_change_event(hass, ["media_player.mpd"], update_lights_music)
+
     return True
