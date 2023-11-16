@@ -14,7 +14,15 @@ from homeassistant.const import (
     EVENT_HOMEASSISTANT_START,
     SERVICE_RELOAD,
 )
-from homeassistant.core import CoreState, Event, HomeAssistant, ServiceCall, callback
+from homeassistant.core import (
+    CoreState,
+    Event,
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+    callback,
+)
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import (
     discovery,
@@ -59,27 +67,82 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         hass.bus.async_fire(f"event_{DOMAIN}_reloaded", context=call.context)
 
-    async def _weather_service_call(call: Event | ServiceCall):
-        weather_type = call.data["main"]
+    async def _weather_service_call(call: ServiceCall) -> ServiceResponse:
+        if call.data.get("main") is None:
+            weather_type = "Cloudy"
+        else:
+            weather_type = call.data["main"]
 
-        hass.bus.async_fire(
-            f"event for {DOMAIN} - Weather service - ",
-            event_data={"main": weather_type},
-            context=call.context,
+        # The light that we have
+        light_entity_id = "light.simulated_light"
+
+        # FIRE EVENT TO GET THE CURRENT WEATHER
+        # Assuming the weather platform is named "weather.home"
+        weather_entity_id = "weather.simulated_weather"
+
+        # Get the weather state object
+        weather_state = hass.states.get(weather_entity_id)
+
+        if weather_state is not None:
+            # Get the current weather condition
+            pass
+        else:
+            # Default to "Cloudy" if weather state is not available
+            pass
+
+        # Define the RGB color based on your weather type (replace this with your logic)
+        if weather_type == "Sunny":
+            rgb_color = [255, 255, 0]  # Example: Yellow color
+        elif weather_type == "Rainy":
+            rgb_color = [0, 0, 255]  # Example: Blue color
+        else:
+            rgb_color = [128, 128, 128]  # Default: White color
+        hass.bus.async_fire("custom_event", {"rgb": rgb_color})
+
+        # Call to turn the light on
+        await hass.services.async_call(
+            "light",
+            "turn_on",
+            {
+                "entity_id": light_entity_id,
+                "rgb_color": rgb_color,
+            },
         )
 
-    async_register_admin_service(hass, DOMAIN, SERVICE_RELOAD, _reload_config)
+        return {"main": weather_type, "rgb": str(rgb_color)}
 
+    async def _weather_service_turn_off(_: ServiceCall):
+        # The light that we have
+        light_entity_id = "light.simulated_light"
+        await hass.services.async_call(
+            "light",
+            "turn_off",
+            {
+                "entity_id": light_entity_id,
+            },
+        )
+
+    # Register the services
+    async_register_admin_service(
+        hass, domain=DOMAIN, service=SERVICE_RELOAD, service_func=_reload_config
+    )
     hass.services.async_register(
         domain=DOMAIN,
         service="weather_service",
         service_func=_weather_service_call,
         schema=vol.Schema(
             {
-                vol.Required("main"): str,
+                vol.Optional("main"): str,
             }
         ),
+        supports_response=SupportsResponse.OPTIONAL,
     )
+    hass.services.async_register(
+        domain=DOMAIN,
+        service="weather_service_turn_off",
+        service_func=_weather_service_turn_off,
+    )
+
     return True
 
 
