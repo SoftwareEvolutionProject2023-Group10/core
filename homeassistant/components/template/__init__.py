@@ -29,10 +29,14 @@ from homeassistant.helpers import (
     trigger as trigger_helper,
     update_coordinator,
 )
+from homeassistant.helpers.event import (
+    EventStateChangedData,
+    async_track_state_change_event,
+)
 from homeassistant.helpers.reload import async_reload_integration_platforms
 from homeassistant.helpers.script import Script
 from homeassistant.helpers.service import async_register_admin_service
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.typing import ConfigType, EventType
 from homeassistant.loader import async_get_integration
 
 from .const import CONF_ACTION, CONF_TRIGGER, DOMAIN, PLATFORMS
@@ -76,7 +80,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # The light that we have
         light_entity_id = "light.simulated_light"
 
-        # FIRE EVENT TO GET THE CURRENT WEATHER
         # Assuming the weather platform is named "weather.home"
         weather_entity_id = "weather.simulated_weather"
 
@@ -96,7 +99,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         elif weather_type == "Rainy":
             rgb_color = [0, 0, 255]  # Example: Blue color
         else:
-            rgb_color = [128, 128, 128]  # Default: White color
+            rgb_color = [50, 168, 82]  # Default: Green color
         hass.bus.async_fire("custom_event", {"rgb": rgb_color})
 
         # Call to turn the light on
@@ -121,6 +124,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 "entity_id": light_entity_id,
             },
         )
+        hass.bus.async_fire("custom_event", {"rgb": [128, 128, 128]})  # Gray color
 
     # Register the services
     async_register_admin_service(
@@ -141,6 +145,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         domain=DOMAIN,
         service="weather_service_turn_off",
         service_func=_weather_service_turn_off,
+    )
+
+    @callback
+    async def update_lights_weather(event: EventType[EventStateChangedData]) -> None:
+        """Call back for update of the weather."""
+
+        # The light that we have
+        light_entity_id = "light.simulated_light"
+        color = (0, 0, 0)
+        await hass.services.async_call(
+            "light",
+            "turn_on",
+            {
+                "entity_id": light_entity_id,
+                "rgb_color": color,
+            },
+        )
+        hass.bus.async_fire("custom_event", {"rgb": color})
+
+    async_track_state_change_event(
+        hass, ["weather.smhi_weather"], update_lights_weather
     )
 
     return True
