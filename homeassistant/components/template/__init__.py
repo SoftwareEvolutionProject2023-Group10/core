@@ -40,6 +40,8 @@ from homeassistant.helpers.typing import ConfigType, EventType
 from homeassistant.loader import async_get_integration
 
 from .const import (
+    ATTR_SIM_LIGHT_ENTITY,
+    ATTR_SMHI_WEATHER,
     BLACK,
     COLOR_MAP,
     CONF_ACTION,
@@ -82,7 +84,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         hass.bus.async_fire(f"event_{DOMAIN}_reloaded", context=call.context)
 
     async def _weather_service_call(call: ServiceCall) -> ServiceResponse:
-        weather_ent_id = "weather.smhi_weather"
+        weather_ent_id = ATTR_SMHI_WEATHER
         weather_state = hass.states.get(weather_ent_id)
 
         weather_type = (
@@ -92,9 +94,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             if weather_state and weather_state.state is not None
             else WINDY
         )
-
-        # The light that we have
-        light_entity_id = "light.simulated_light"
 
         # Define the RGB color based on your weather type (replace this with your logic)
         rgb_color = COLOR_MAP.get(weather_type, BLACK)
@@ -109,7 +108,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "light",
             "turn_on",
             {
-                "entity_id": light_entity_id,
+                "entity_id": ATTR_SIM_LIGHT_ENTITY,
                 "rgb_color": rgb_color,
             },
         )
@@ -118,17 +117,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def _weather_service_turn_off(_: ServiceCall):
         # The light that we have
-        light_entity_id = "light.simulated_light"
         await hass.services.async_call(
             "light",
             "turn_off",
             {
-                "entity_id": light_entity_id,
+                "entity_id": ATTR_SIM_LIGHT_ENTITY,
             },
         )
-        hass.bus.async_fire(
-            CONF_RGB_EVENT, {"rgb": GRAY, "condition": " "}
-        )  # Gray color
+        hass.bus.async_fire(CONF_RGB_EVENT, {"rgb": GRAY, "condition": ""})
 
     # Register the services
     async_register_admin_service(
@@ -155,7 +151,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async def update_lights_weather(event: EventType[EventStateChangedData]) -> None:
         """Call back for update of the weather."""
         # The light that we have
-        light_entity_id = "light.simulated_light"
         condition_state = event.data.get("new_state")
         condition = (
             condition_state.state
@@ -167,15 +162,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "light",
             "turn_on",
             {
-                "entity_id": light_entity_id,
+                "entity_id": ATTR_SIM_LIGHT_ENTITY,
                 "rgb_color": color,
             },
         )
         hass.bus.async_fire(CONF_RGB_EVENT, {"condition": condition, "rgb": color})
 
-    async_track_state_change_event(
-        hass, ["weather.smhi_weather"], update_lights_weather
-    )
+    async_track_state_change_event(hass, [ATTR_SMHI_WEATHER], update_lights_weather)
 
     return True
 

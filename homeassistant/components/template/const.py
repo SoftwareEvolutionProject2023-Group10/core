@@ -32,8 +32,10 @@ CONF_ATTRIBUTES = "attributes"
 CONF_ATTRIBUTE_TEMPLATES = "attribute_templates"
 CONF_PICTURE = "picture"
 CONF_OBJECT_ID = "object_id"
-
 CONF_RGB_EVENT = "rgb_event"
+
+ATTR_SIM_LIGHT_ENTITY = "light.simulated_light"
+ATTR_SMHI_WEATHER = "weather.smhi_weather"
 
 # Weather conditions as constants
 CLEAR_NIGHT = "clear-night"
