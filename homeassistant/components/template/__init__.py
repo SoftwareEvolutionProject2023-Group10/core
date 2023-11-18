@@ -43,6 +43,7 @@ from .const import (
     BLACK,
     COLOR_MAP,
     CONF_ACTION,
+    CONF_RGB_EVENT,
     CONF_TRIGGER,
     DOMAIN,
     GRAY,
@@ -100,7 +101,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         # Fire custom event
         hass.bus.async_fire(
-            "custom_event", {"rgb": rgb_color, "condition": str(weather_type)}
+            CONF_RGB_EVENT, {"rgb": rgb_color, "condition": str(weather_type)}
         )
 
         # Call to turn the light on
@@ -126,7 +127,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             },
         )
         hass.bus.async_fire(
-            "custom_event", {"rgb": GRAY, "condition": " "}
+            CONF_RGB_EVENT, {"rgb": GRAY, "condition": " "}
         )  # Gray color
 
     # Register the services
@@ -170,7 +171,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 "rgb_color": color,
             },
         )
-        hass.bus.async_fire("custom_event", {"condition": condition, "rgb": color})
+        hass.bus.async_fire(CONF_RGB_EVENT, {"condition": condition, "rgb": color})
 
     async_track_state_change_event(
         hass, ["weather.smhi_weather"], update_lights_weather

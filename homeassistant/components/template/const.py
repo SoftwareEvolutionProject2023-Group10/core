@@ -33,6 +33,8 @@ CONF_ATTRIBUTE_TEMPLATES = "attribute_templates"
 CONF_PICTURE = "picture"
 CONF_OBJECT_ID = "object_id"
 
+CONF_RGB_EVENT = "rgb_event"
+
 # Weather conditions as constants
 CLEAR_NIGHT = "clear-night"
 CLOUDY = "cloudy"
