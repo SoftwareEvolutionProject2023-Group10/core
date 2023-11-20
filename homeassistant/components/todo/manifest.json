@@ -1,0 +1,10 @@
+{
+  "domain": "todo",
+  "name": "TODO",
+  "codeowners": [],
+  "config_flow": false,
+  "documentation": "",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "quality_scale": "internal"
+}
