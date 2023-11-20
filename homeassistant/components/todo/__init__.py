@@ -3,14 +3,14 @@
 
 import logging
 
-from weather_mapping import get_color_for_weather_state
-
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import (
     EventStateChangedData,
     async_track_state_change_event,
 )
 from homeassistant.helpers.typing import ConfigType, EventType
+
+from .weather_mapping import get_color_for_weather_state
 
 _LOGGER = logging.getLogger(__name__)
 
