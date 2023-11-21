@@ -34,7 +34,7 @@ CONF_PICTURE = "picture"
 CONF_OBJECT_ID = "object_id"
 CONF_RGB_EVENT = "rgb_event"
 
-ATTR_SIM_LIGHT_ENTITY = "light.simulated_light"
+ATTR_SIM_LIGHT_ENTITY = "light.simulated_light_frontend"
 ATTR_SMHI_WEATHER = "weather.smhi_weather"
 
 # Weather conditions as constants
