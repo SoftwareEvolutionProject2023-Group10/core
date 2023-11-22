@@ -1,12 +1,10 @@
 """Support for enabling and disabling the music syncing."""
 from __future__ import annotations
 
-from collections import Counter
 import io
-import random
 from typing import Any
 
-from PIL import Image, UnidentifiedImageError
+from colorthief import ColorThief
 
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
@@ -51,40 +49,17 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
 
         component: EntityComponent[MediaPlayerEntity] = self.hass.data[domain]
         media_player: MediaPlayerEntity | None = component.get_entity(entity_id)
-        if media_player is not None:
-            image = await media_player.async_get_media_image()
-        else:
+        if media_player is None:
             return
 
-        # Convert bytes to stream (file-like object in memory)
-        image_bytes: bytes | None = image[0]
-        if image_bytes is not None:
-            picture_stream: io.BytesIO = io.BytesIO(image_bytes)
-        else:
+        image = await media_player.async_get_media_image()
+        image_bytes = image[0]
+        if image_bytes is None:
             return
 
-        # Create a PIL Image,
-        try:
-            picture = Image.open(picture_stream)
-        except UnidentifiedImageError:
-            return
+        color_thief = ColorThief(io.BytesIO(image_bytes))
+        dominant_color = color_thief.get_color(quality=1)
 
-        # make sure that image is RGB based
-        if picture.mode == "RGB":
-            # Get the pixels from the image
-            pixels = list(picture.getdata())
-
-            # Count amount of times each pixel/color occurs
-            color_counts = Counter(pixels)
-
-            # Get the color that appears the most
-            dominant_color = color_counts.most_common(1)[0][0]
-        else:
-            dominant_color = (
-                random.randint(0, 255),
-                random.randint(0, 255),
-                random.randint(0, 255),
-            )
         for light_id in self._light_ids:
             await self.hass.services.async_call(
                 "light",
