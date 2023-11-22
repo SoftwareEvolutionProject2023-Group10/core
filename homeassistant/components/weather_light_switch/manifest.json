@@ -2,6 +2,7 @@
   "domain": "weather_light_switch",
   "name": "Weather Light Switch",
   "codeowners": [],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://we.dont.have.a.website",
   "integration_type": "helper",
