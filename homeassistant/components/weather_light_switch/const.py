@@ -35,6 +35,7 @@ SNOW = (255, 250, 250)
 RED_ORANGE = (255, 69, 0)
 BLACK = (10, 0, 0)
 GRAY = (128, 128, 128)
+OFF_LIGHT = (68, 115, 158)
 
 COLOR_MAP = {
     CLEAR_NIGHT: NAVY_BLUE,  # Navy Blue
@@ -52,5 +53,5 @@ COLOR_MAP = {
     SUNNY: YELLOW,  # Yellow
     WINDY: RED_ORANGE,  # Red-Orange
     WINDY_VARIANT: RED_ORANGE,  # Red-Orange
-    OFF: GRAY,
+    OFF: OFF_LIGHT,
 }
