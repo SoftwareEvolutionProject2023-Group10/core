@@ -33,25 +33,6 @@ def weather_to_color(weather) -> tuple[int, int, int] | None:
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register event listeners during startup of Home Assistant."""
 
-    def change_color(color: tuple[int, int, int] | None) -> None:
-        if color is None:
-            hass.add_job(
-                hass.services.async_call,
-                "light",
-                "turn_off",
-                {"entity_id": "light.fake_light"},
-            )
-        else:
-            hass.add_job(
-                hass.services.async_call,
-                "light",
-                "turn_on",
-                {
-                    "entity_id": "light.fake_light",
-                    "rgb_color": color,
-                },
-            )
-
     async def _weather_service_call(call: ServiceCall) -> ServiceResponse:
         # FM:See if the weather_feature is on
         # If is off -> Act like normal light --> toggle
@@ -103,12 +84,26 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     @callback
     async def update_lights_weather(event: EventType[EventStateChangedData]) -> None:
-        weather = event.data["new_state"]
-        if weather is None:
-            return
+        """Call back for update of the weather."""
+        # The light that we have
+        condition_state = event.data.get("new_state")
+        condition = (
+            condition_state.state
+            if condition_state and condition_state.state is not None
+            else WINDY
+        )
+        color = COLOR_MAP.get(condition, BLACK)
+        await hass.services.async_call(
+            "light",
+            "turn_on",
+            {
+                "entity_id": ATTR_SIM_LIGHT_ENTITY,
+                "rgb_color": color,
+            },
+        )
+        hass.bus.async_fire("rgb_event", {"condition": condition, "rgb": color})
 
-        color = weather_to_color(weather)
-        change_color(color)
-
-    async_track_state_change_event(hass, ["weather.smhi_home"], update_lights_weather)
+    async_track_state_change_event(
+        hass, ["weather.smhi_weather"], update_lights_weather
+    )
     return True
