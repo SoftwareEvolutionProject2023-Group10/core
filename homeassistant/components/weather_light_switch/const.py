@@ -1,3 +1,3 @@
 """Constants for this integration."""
 
-DOMAIN = "light_switcher"
+DOMAIN = "weather_light_switch"
