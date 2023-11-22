@@ -14,6 +14,7 @@ FLOWS = {
         "threshold",
         "tod",
         "utility_meter",
+        "weather_light_switch",
     ],
     "integration": [
         "abode",

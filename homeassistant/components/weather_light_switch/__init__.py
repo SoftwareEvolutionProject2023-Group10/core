@@ -1,6 +1,8 @@
 """Registers listeners for state change events."""
 
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import (
@@ -56,4 +58,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async_track_state_change_event(hass, ["weather.smhi_home"], update_lights_weather)
 
+    return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Register a switch entity responsible for the lights described by entry."""
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setups(entry, [Platform.SWITCH])
+    )
     return True
