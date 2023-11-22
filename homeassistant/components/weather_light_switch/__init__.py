@@ -30,6 +30,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         weather_ent_id = "weather.smhi_weather"
         weather_state = hass.states.get(weather_ent_id)
 
+        # Want to add weather_state.attributes.get("temperature") but confused of the weather_type thingy :)
         temperature = None
         brightness = calculate_brightness(temperature)
 
