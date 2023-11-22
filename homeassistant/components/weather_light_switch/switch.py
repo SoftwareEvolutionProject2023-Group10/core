@@ -6,7 +6,7 @@ from typing import Any
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant
+from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import (
     EventStateChangedData,
@@ -14,7 +14,7 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
-from .const import DOMAIN
+from .const import ATTR_SIM_LIGHT_ENTITY, BLACK, COLOR_MAP, DOMAIN, WINDY
 
 
 def weather_to_color(weather) -> tuple[int, int, int] | None:
@@ -41,33 +41,28 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
         self._weather_entity_id = config_entry.options["weather_entity_id"]
         self._light_ids = config_entry.options["light_ids"]
 
+    @callback
     async def _update_lights_weather(
         self, event: EventType[EventStateChangedData]
     ) -> None:
-        weather = event.data["new_state"]
-        if weather is None:
-            return
-
-        color = weather_to_color(weather)
-        if color is None:
-            for entity_id in self._light_ids:
-                self.hass.add_job(
-                    self.hass.services.async_call,
-                    "light",
-                    "turn_off",
-                    {"entity_id": entity_id},
-                )
-        else:
-            for entity_id in self._light_ids:
-                self.hass.add_job(
-                    self.hass.services.async_call,
-                    "light",
-                    "turn_on",
-                    {
-                        "entity_id": entity_id,
-                        "rgb_color": color,
-                    },
-                )
+        """Call back for update of the weather."""
+        # The light that we have
+        condition_state = event.data.get("new_state")
+        condition = (
+            condition_state.state
+            if condition_state and condition_state.state is not None
+            else WINDY
+        )
+        color = COLOR_MAP.get(condition, BLACK)
+        await self.hass.services.async_call(
+            "light",
+            "turn_on",
+            {
+                "entity_id": ATTR_SIM_LIGHT_ENTITY,
+                "rgb_color": color,
+            },
+        )
+        self.hass.bus.async_fire("rgb_event", {"condition": condition, "rgb": color})
 
     @property
     def is_on(self) -> bool:
