@@ -9,6 +9,7 @@ FLOWS = {
         "group",
         "integration",
         "min_max",
+        "music_light_switch",
         "switch_as_x",
         "template",
         "threshold",
