@@ -30,6 +30,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         weather_ent_id = "weather.smhi_weather"
         weather_state = hass.states.get(weather_ent_id)
 
+        temperature = None
+        brightness = calculate_brightness(temperature)
+
         weather_type = (
             call.data["main"]
             if call.data.get("main") is not None
@@ -53,10 +56,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             {
                 "entity_id": ATTR_SIM_LIGHT_ENTITY,
                 "rgb_color": rgb_color,
+                "brightness": brightness,
             },
         )
 
-        return {"main": str(weather_type), "rgb": str(rgb_color)}
+        return {
+            "main": str(weather_type),
+            "rgb": str(rgb_color),
+            "brightness": brightness,
+        }
 
     hass.services.async_register(
         domain=DOMAIN,
@@ -78,3 +86,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_setups(entry, [Platform.SWITCH])
     )
     return True
+
+
+def calculate_brightness(temperature) -> int:
+    """Define the brightness base of temperature in the range of 0-100."""
+    min_temp = -20  # Minimum temperature
+    max_temp = 40  # Maximum temperature
+
+    # Normalize the temperature within the range
+    normalized_temp = (temperature - min_temp) / (max_temp - min_temp)
+
+    brightness = normalized_temp * 100
+
+    # 0 to 100
+    brightness = max(0, min(brightness, 100))
+
+    return int(brightness)
