@@ -1,0 +1,10 @@
+{
+  "domain": "music_lights",
+  "name": "music_lights",
+  "codeowners": [],
+  "config_flow": false,
+  "documentation": "https://www.home-assistant.io/integrations/musiclights",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "quality_scale": "internal"
+}
