@@ -1,6 +1,7 @@
 """Support for enabling and disabling the music syncing."""
 from __future__ import annotations
 
+from collections import Counter
 import io
 import random
 from typing import Any
@@ -70,10 +71,16 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
 
         # make sure that image is RGB based
         if picture.mode == "RGB":
+            # Get the pixels from the image
             pixels = list(picture.getdata())
-            rand_color = random.choice(pixels)
+
+            # Count amount of times each pixel/color occurs
+            color_counts = Counter(pixels)
+
+            # Get the color that appears the most
+            dominant_color = color_counts.most_common(1)[0][0]
         else:
-            rand_color = (
+            dominant_color = (
                 random.randint(0, 255),
                 random.randint(0, 255),
                 random.randint(0, 255),
@@ -82,7 +89,7 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
             await self.hass.services.async_call(
                 "light",
                 "turn_on",
-                {"entity_id": light_id, "rgb_color": rand_color},
+                {"entity_id": light_id, "rgb_color": dominant_color},
             )
 
     @property
