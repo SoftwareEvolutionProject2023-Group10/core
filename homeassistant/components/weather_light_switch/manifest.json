@@ -1,0 +1,10 @@
+{
+  "domain": "weather_light_switch",
+  "name": "Weather Light Switch",
+  "codeowners": [],
+  "dependencies": [],
+  "documentation": "https://we.dont.have.a.website",
+  "integration_type": "helper",
+  "iot_class": "local_push",
+  "requirements": []
+}

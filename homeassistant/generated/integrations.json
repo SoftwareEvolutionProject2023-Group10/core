@@ -6697,16 +6697,16 @@
       "config_flow": true,
       "iot_class": "local_push"
     },
-    "light_switcher": {
-      "name": "Light Switcher",
-      "integration_type": "helper",
-      "config_flow": false,
-      "iot_class": "local_push"
-    },
     "min_max": {
       "integration_type": "helper",
       "config_flow": true,
       "iot_class": "calculated"
+    },
+    "music_light_switch": {
+      "name": "Music Light Switch",
+      "integration_type": "helper",
+      "config_flow": false,
+      "iot_class": "local_push"
     },
     "schedule": {
       "integration_type": "helper",
@@ -6741,6 +6741,12 @@
     "utility_meter": {
       "integration_type": "helper",
       "config_flow": true,
+      "iot_class": "local_push"
+    },
+    "weather_light_switch": {
+      "name": "Weather Light Switch",
+      "integration_type": "helper",
+      "config_flow": false,
       "iot_class": "local_push"
     }
   },

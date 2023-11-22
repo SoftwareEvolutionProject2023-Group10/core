@@ -1,6 +1,6 @@
 {
-  "domain": "light_switcher",
-  "name": "Light Switcher",
+  "domain": "music_light_switch",
+  "name": "Music Light Switch",
   "codeowners": [],
   "dependencies": [],
   "documentation": "https://we.dont.have.a.website",
