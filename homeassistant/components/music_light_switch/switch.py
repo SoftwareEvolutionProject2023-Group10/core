@@ -35,8 +35,17 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
         """Initialize the entity."""
         self._attr_unique_id = config_entry.entry_id
         self.entity_id = f"{DOMAIN}.music_light_switch_enabled"
-        self._media_player_entity_id = config_entry.options["media_player_entity_id"]
-        self._light_ids = config_entry.options["light_ids"]
+        self._config_entry = config_entry
+        config_entry.async_on_unload(
+            config_entry.add_update_listener(self._on_config_entry_update)
+        )
+
+    async def _on_config_entry_update(
+        self, hass: HomeAssistant, config_entry: ConfigEntry
+    ) -> None:
+        if self.is_on:
+            await self.async_turn_off()
+            await self.async_turn_on()
 
     async def _update_lights_music(
         self, event: EventType[EventStateChangedData]
@@ -61,7 +70,7 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
         color_thief = ColorThief(io.BytesIO(image_bytes))
         dominant_color = color_thief.get_color(quality=5)
 
-        for light_id in self._light_ids:
+        for light_id in self.light_ids:
             await self.hass.services.async_call(
                 "light",
                 "turn_on",
@@ -77,7 +86,7 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
         """Turn the entity on."""
         self._attr_is_on = True
         self._remove_music_listener = async_track_state_change_event(
-            self.hass, [self._media_player_entity_id], self._update_lights_music
+            self.hass, [self.media_player_entity_id], self._update_lights_music
         )
 
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -86,6 +95,16 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
         if self._remove_music_listener is not None:
             self._remove_music_listener()
             self._remove_music_listener = None
+
+    @property
+    def media_player_entity_id(self):
+        """Getter for media_player_entity_id."""
+        return self._config_entry.options["media_player_entity_id"]
+
+    @property
+    def light_ids(self):
+        """Getter for light_ids."""
+        return self._config_entry.options["light_ids"]
 
 
 async def async_setup_entry(
