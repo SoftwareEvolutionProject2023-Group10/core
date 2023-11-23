@@ -7,7 +7,11 @@ from typing import Any
 from colorthief import ColorThief
 
 from homeassistant.components.media_player import MediaPlayerEntity
-from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
+from homeassistant.components.switch import (
+    DOMAIN as SWITCH_DOMAIN,
+    SwitchDeviceClass,
+    SwitchEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant
@@ -19,22 +23,20 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
-from .const import DOMAIN
-
 
 class MusicLightSwitchEnabledEntity(SwitchEntity):
     """Enabled state of a light switcher."""
 
+    entity_id = f"{SWITCH_DOMAIN}.music_light_switch_enabled"
+    _attr_name = "Music light switch"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_device_class = SwitchDeviceClass.SWITCH
     _attr_is_on = False
     _remove_music_listener: CALLBACK_TYPE | None = None
-    _attr_name = "Music light switch"
 
     def __init__(self, config_entry) -> None:
         """Initialize the entity."""
         self._attr_unique_id = config_entry.entry_id
-        self.entity_id = f"{DOMAIN}.music_light_switch_enabled"
         self._config_entry = config_entry
         config_entry.async_on_unload(
             config_entry.add_update_listener(self._on_config_entry_update)

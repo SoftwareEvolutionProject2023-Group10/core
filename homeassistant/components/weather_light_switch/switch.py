@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
+from homeassistant.components.switch import (
+    DOMAIN as SWITCH_DOMAIN,
+    SwitchDeviceClass,
+    SwitchEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -14,21 +18,19 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
-from .const import DOMAIN
-
 
 class WeatherLightSwitchEnabledEntity(SwitchEntity):
     """Enabled state of a light switcher."""
 
+    entity_id = f"{SWITCH_DOMAIN}.weather_light_switch_enabled"
+    _attr_name = "Weather light switch"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_device_class = SwitchDeviceClass.SWITCH
     _attr_is_on = False
     _remove_weather_listener: CALLBACK_TYPE | None = None
-    _attr_name = "Weather light switch"
 
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize the entity."""
-        self.entity_id = f"{DOMAIN}.weather_light_switch_enabled"
         self._attr_unique_id = config_entry.entry_id
         self._config_entry = config_entry
         config_entry.async_on_unload(
