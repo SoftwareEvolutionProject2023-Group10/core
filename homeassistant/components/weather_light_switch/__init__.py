@@ -58,7 +58,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     "turn_on",
                     {
                         "entity_id": light_id,
-                        "rgb_color": rgb_color,
+                        "hs_color": rgb_color,
                     },
                 )
         else:
