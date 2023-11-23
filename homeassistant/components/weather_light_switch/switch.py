@@ -46,8 +46,8 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
             await self.async_turn_on()
 
     @callback
-    async def _update_lights_weather(
-        self, event: EventType[EventStateChangedData]
+    async def _update_lights(
+        self, event: EventType[EventStateChangedData] | None = None
     ) -> None:
         """Call back for update of the weather."""
 
@@ -65,8 +65,9 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         self._attr_is_on = True
+        await self._update_lights()
         self._remove_weather_listener = async_track_state_change_event(
-            self.hass, [self.weather_entity_id], self._update_lights_weather
+            self.hass, [self.weather_entity_id], self._update_lights
         )
 
     async def async_turn_off(self, **kwargs: Any) -> None:

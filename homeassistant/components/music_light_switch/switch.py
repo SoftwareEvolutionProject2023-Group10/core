@@ -6,7 +6,11 @@ from typing import Any
 
 from colorthief import ColorThief
 
-from homeassistant.components.media_player import MediaPlayerEntity
+from homeassistant.components.media_player import (
+    DOMAIN as MEDIA_PLAYER_DOMAIN,
+    MediaPlayerEntity,
+    MediaPlayerState,
+)
 from homeassistant.components.switch import (
     DOMAIN as SWITCH_DOMAIN,
     SwitchDeviceClass,
@@ -50,19 +54,17 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
             await self.async_turn_off()
             await self.async_turn_on()
 
-    async def _update_lights_music(
-        self, event: EventType[EventStateChangedData]
+    async def _update_lights(
+        self, event: EventType[EventStateChangedData] | None = None
     ) -> None:
         """Set the lights based on the current cover art."""
-        if event.data["new_state"] is not None:
-            domain = event.data["new_state"].domain
-            entity_id = event.data["new_state"].entity_id
-        else:
-            return
-
-        component: EntityComponent[MediaPlayerEntity] = self.hass.data[domain]
-        media_player: MediaPlayerEntity | None = component.get_entity(entity_id)
-        if media_player is None:
+        component: EntityComponent[MediaPlayerEntity] = self.hass.data[
+            MEDIA_PLAYER_DOMAIN
+        ]
+        media_player: MediaPlayerEntity | None = component.get_entity(
+            self.media_player_entity_id
+        )
+        if media_player is None or media_player.state != MediaPlayerState.PLAYING:
             return
 
         image = await media_player.async_get_media_image()
@@ -88,8 +90,9 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         self._attr_is_on = True
+        await self._update_lights()
         self._remove_music_listener = async_track_state_change_event(
-            self.hass, [self.media_player_entity_id], self._update_lights_music
+            self.hass, [self.media_player_entity_id], self._update_lights
         )
 
     async def async_turn_off(self, **kwargs: Any) -> None:
