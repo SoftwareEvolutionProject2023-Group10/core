@@ -25,6 +25,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     ) -> ServiceResponse:
         if switch_entity.is_on:
             weather_state = hass.states.get(switch_entity.weather_entity_id)
+
+            # Case 1: We take the hardcoded, 2: We get it from the weather entity, 3: We say its windy
             weather_type = (
                 call.data["main"]
                 if call.data.get("main") is not None
@@ -33,8 +35,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 else WINDY
             )
 
+            # Get the correct color according to the weather_type.
             rgb_color = COLOR_MAP.get(weather_type, OFF)
 
+            # We get the switch id, which is send by the `_update_lights_weather()` in switch.py
             switch_entity_id = (
                 call.data["entity_id"] if call.data.get("entity_id") is not None else ""
             )
@@ -58,6 +62,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     },
                 )
         else:
+            # If the switch is of, we just turn on the light
             for light_id in switch_entity.light_ids:
                 await hass.services.async_call(
                     "light",
@@ -71,6 +76,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "light_ids": switch_entity.light_ids,
         }
 
+    # Register the service to the 'switch' entity
     hass.data["switch"].async_register_entity_service(
         name="weather_service",
         func=_weather_service_call,
