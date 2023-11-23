@@ -58,7 +58,7 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
             return
 
         color_thief = ColorThief(io.BytesIO(image_bytes))
-        dominant_color = color_thief.get_color(quality=1)
+        dominant_color = color_thief.get_color(quality=5)
 
         for light_id in self._light_ids:
             await self.hass.services.async_call(
