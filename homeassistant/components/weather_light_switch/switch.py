@@ -17,15 +17,6 @@ from homeassistant.helpers.typing import EventType
 from .const import DOMAIN
 
 
-def weather_to_color(weather) -> tuple[int, int, int] | None:
-    """Given the current weather, returns a color representing that weather."""
-
-    if weather.state == "cloudy":
-        return (255, 0, 0)
-
-    return None
-
-
 class WeatherLightSwitchEnabledEntity(SwitchEntity):
     """Enabled state of a light switcher."""
 

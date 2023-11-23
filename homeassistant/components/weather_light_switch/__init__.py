@@ -11,8 +11,9 @@ from homeassistant.core import (
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .const import COLOR_MAP, DOMAIN, OFF, WINDY
+from .const import DOMAIN
 from .switch import WeatherLightSwitchEnabledEntity
+from .weather_mapping import get_color_for_weather_state
 
 CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
@@ -32,13 +33,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 if call.data.get("main") is not None
                 else weather_state.state
                 if weather_state and weather_state.state is not None
-                else WINDY
+                else "windy"
             )
 
             # Want to add weather_state.attributes.get("temperature") but confused of the weather_type thingy :)
             temperature = None
             brightness = calculate_brightness(temperature)
-            hs_color = COLOR_MAP.get(weather_type, OFF)
+            hs_color = get_color_for_weather_state(weather_type)
 
             # We get the switch id, which is send by the `_update_lights_weather()` in switch.py
             switch_entity_id = (
