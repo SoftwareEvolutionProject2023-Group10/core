@@ -1,10 +1,10 @@
 """Constants for this integration."""
+import colorsys
 
 DOMAIN = "weather_light_switch"
 DEFAULT_TEMP = 20
 ATTR_SIM_LIGHT_ENTITY = "light.simulated_light"
 ATTR_SMHI_WEATHER = "weather.smhi_weather"
-
 # Weather conditions as constants
 CLEAR_NIGHT = "clear-night"
 CLOUDY = "cloudy"
@@ -24,39 +24,42 @@ WINDY_VARIANT = "windy-variant"
 OFF = "OFF"
 
 # RGB colors as constants
-MIDNIGHT_BLUE = (25, 25, 112)
+NAVY_BLUE = (0, 0, 128)
 DARK_GRAY = (169, 169, 169)
-GOLD = (255, 215, 0)
-SILVER = (105, 105, 105)
-SKY_BLUE = (135, 206, 250)
-YELLOW = (255, 255, 2)
-DARK_BLUE = (0, 0, 139)
-LIGHT_YELLOW = (250, 250, 210)
-STEEL_BLUE = (70, 130, 180)
-BLUE = (30, 144, 255)
-SNOW = (250, 250, 250)
-POWDER_BLUE = (176, 224, 230)
-BRIGHT_YELLOW = (255, 255, 0)
-PALE_GREEN = (152, 251, 152)
+RED = (255, 0, 0)
+SILVER = (192, 192, 192)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+TEAL = (0, 128, 128)
+SNOW = (255, 250, 250)
 RED_ORANGE = (255, 69, 0)
 BLACK = (0, 0, 0)
 OFF_LIGHT = (68, 115, 158)
 
+
+def rgb_to_hs(rgb):
+    """RGB to HS converter."""
+    r, g, b = (x / 255.0 for x in rgb)
+    h, s, _ = colorsys.rgb_to_hsv(r, g, b)
+    return int(h * 360), int(s * 100)
+
+
+# Color map with HS values directly
 COLOR_MAP = {
-    CLEAR_NIGHT: MIDNIGHT_BLUE,  # Midnight_Blue
-    CLOUDY: DARK_GRAY,  # Dark_Gray
-    EXCEPTIONAL: GOLD,  # Gold
-    FOG: SILVER,  # Silver
-    HAIL: SKY_BLUE,  # Sky_Blue
-    LIGHTNING: YELLOW,  # Yellow
-    LIGHTNING_RAINY: DARK_BLUE,  # Dark_Blue
-    PARTLY_CLOUDY: LIGHT_YELLOW,  # Light_Yellow
-    POURING: STEEL_BLUE,  # Steel_Blue
-    RAINY: BLUE,  # Blue
-    SNOWY: SNOW,  # Snow
-    SNOWY_RAINY: POWDER_BLUE,  # Powder_Blue
-    SUNNY: BRIGHT_YELLOW,  # Bright_Yellow
-    WINDY: PALE_GREEN,  # Pale_Green
-    WINDY_VARIANT: RED_ORANGE,  # Red_Orange
-    OFF: BLACK,
+    CLEAR_NIGHT: rgb_to_hs(NAVY_BLUE),
+    CLOUDY: rgb_to_hs(TEAL),
+    EXCEPTIONAL: rgb_to_hs(RED),
+    FOG: rgb_to_hs(TEAL),
+    HAIL: rgb_to_hs(BLUE),
+    LIGHTNING: rgb_to_hs(YELLOW),
+    LIGHTNING_RAINY: rgb_to_hs(TEAL),
+    PARTLY_CLOUDY: rgb_to_hs(YELLOW),
+    POURING: rgb_to_hs(BLUE),
+    RAINY: rgb_to_hs(BLUE),
+    SNOWY: rgb_to_hs(SNOW),
+    SNOWY_RAINY: rgb_to_hs(BLUE),
+    SUNNY: rgb_to_hs(YELLOW),
+    WINDY: rgb_to_hs(RED_ORANGE),
+    WINDY_VARIANT: rgb_to_hs(RED_ORANGE),
+    OFF: rgb_to_hs(OFF_LIGHT),
 }

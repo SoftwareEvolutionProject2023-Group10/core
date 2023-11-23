@@ -1,7 +1,5 @@
 """Registers listeners for state change events."""
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import (
@@ -13,7 +11,8 @@ from homeassistant.core import (
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .const import ATTR_SIM_LIGHT_ENTITY, BLACK, COLOR_MAP, DOMAIN, WINDY
+from .const import COLOR_MAP, DOMAIN, OFF, WINDY
+from .switch import WeatherLightSwitchEnabledEntity
 
 CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
@@ -21,61 +20,67 @@ CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register event listeners during startup of Home Assistant."""
 
-    async def _weather_service_call(call: ServiceCall) -> ServiceResponse:
-        # FM:See if the weather_feature is on
-        # If is off -> Act like normal light --> toggle
-        # If is on -> Set the light based on weather
+    async def _weather_service_call(
+        switch_entity: WeatherLightSwitchEnabledEntity, call: ServiceCall
+    ) -> ServiceResponse:
+        if switch_entity.is_on:
+            weather_state = hass.states.get(switch_entity.weather_entity_id)
 
-        # FM:Choose from the selected light entities that is selected in the switcher. Also do loop for all chosen ones
-        weather_ent_id = "weather.smhi_weather"
-        weather_state = hass.states.get(weather_ent_id)
+            # Case 1: We take the hardcoded, 2: We get it from the weather entity, 3: We say its windy
+            weather_type = (
+                call.data["main"]
+                if call.data.get("main") is not None
+                else weather_state.state
+                if weather_state and weather_state.state is not None
+                else WINDY
+            )
 
-        # Want to add weather_state.attributes.get("temperature") but confused of the weather_type thingy :)
-        temperature = None
-        brightness = calculate_brightness(temperature)
+            # Want to add weather_state.attributes.get("temperature") but confused of the weather_type thingy :)
+            temperature = None
+            brightness = calculate_brightness(temperature)
+            hs_color = COLOR_MAP.get(weather_type, OFF)
 
-        weather_type = (
-            call.data["main"]
-            if call.data.get("main") is not None
-            else weather_state.state
-            if weather_state and weather_state.state is not None
-            else WINDY
-        )
+            # We get the switch id, which is send by the `_update_lights_weather()` in switch.py
+            switch_entity_id = (
+                call.data["entity_id"] if call.data.get("entity_id") is not None else ""
+            )
 
-        # Define the RGB color based on your weather type (replace this with your logic)
-        rgb_color = COLOR_MAP.get(weather_type, BLACK)
+            hass.bus.async_fire(
+                "rgb_event",
+                {
+                    "rgb": hs_color,
+                    "condition": str(weather_type),
+                    "ent_id": switch_entity_id[0],
+                },
+            )
 
-        # Fire custom event
-        hass.bus.async_fire(
-            "rgb_event", {"rgb": rgb_color, "condition": str(weather_type)}
-        )
-
-        # Call to turn the light on
-        await hass.services.async_call(
-            "light",
-            "turn_on",
-            {
-                "entity_id": ATTR_SIM_LIGHT_ENTITY,
-                "rgb_color": rgb_color,
-                "brightness": brightness,
-            },
-        )
+            # Call to turn the light on
+            for light_id in switch_entity.light_ids:
+                await hass.services.async_call(
+                    "light",
+                    "turn_on",
+                    {
+                        "entity_id": light_id,
+                        "hs_color": hs_color,
+                        "brightness": brightness,
+                    },
+                )
 
         return {
             "main": str(weather_type),
-            "rgb": str(rgb_color),
-            "brightness": brightness,
+            "switch_state": switch_entity.state,
+            "light_ids": switch_entity.light_ids,
         }
 
-    hass.services.async_register(
-        domain=DOMAIN,
-        service="weather_service",
-        service_func=_weather_service_call,
-        schema=vol.Schema(
-            {
-                vol.Optional("main"): str,
-            }
-        ),
+    # Register the service to the 'switch' entity
+    hass.data["switch"].async_register_entity_service(
+        name="weather_service",
+        func=_weather_service_call,
+        schema={
+            "main": str,
+            "light_id": str,
+            "weather_entity_id": str,
+        },
         supports_response=SupportsResponse.OPTIONAL,
     )
     return True
