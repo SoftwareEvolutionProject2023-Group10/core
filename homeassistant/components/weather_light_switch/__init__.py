@@ -2,7 +2,12 @@
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+)
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
@@ -74,6 +79,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "light_id": str,
             "weather_entity_id": str,
         },
+        supports_response=SupportsResponse.OPTIONAL,
     )
     return True
 
