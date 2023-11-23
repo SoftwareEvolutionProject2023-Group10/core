@@ -33,6 +33,7 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
     _attr_device_class = SwitchDeviceClass.SWITCH
     _attr_is_on = False
     _remove_weather_listener: CALLBACK_TYPE | None = None
+    _attr_name = "Weather light switch"
 
     def __init__(self, config_entry) -> None:
         """Initialize the entity."""
