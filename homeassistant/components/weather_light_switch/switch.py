@@ -14,7 +14,7 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
-from .const import ATTR_SIM_LIGHT_ENTITY, BLACK, COLOR_MAP, DOMAIN, WINDY
+from .const import DOMAIN
 
 
 def weather_to_color(weather) -> tuple[int, int, int] | None:
@@ -46,23 +46,12 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
         self, event: EventType[EventStateChangedData]
     ) -> None:
         """Call back for update of the weather."""
-        # The light that we have
-        condition_state = event.data.get("new_state")
-        condition = (
-            condition_state.state
-            if condition_state and condition_state.state is not None
-            else WINDY
-        )
-        color = COLOR_MAP.get(condition, BLACK)
+
         await self.hass.services.async_call(
-            "light",
-            "turn_on",
-            {
-                "entity_id": ATTR_SIM_LIGHT_ENTITY,
-                "rgb_color": color,
-            },
+            "switch",
+            "weather_service",
+            {"entity_id": self.entity_id, "weather_entity_id": self._weather_entity_id},
         )
-        self.hass.bus.async_fire("rgb_event", {"condition": condition, "rgb": color})
 
     @property
     def is_on(self) -> bool:
@@ -82,6 +71,16 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
         if self._remove_weather_listener is not None:
             self._remove_weather_listener()
             self._remove_weather_listener = None
+
+    @property
+    def weather_entity_id(self):
+        """Getter for weather_entity_id."""
+        return self._weather_entity_id
+
+    @property
+    def light_ids(self):
+        """Getter to get all light ids."""
+        return self._light_ids
 
 
 async def async_setup_entry(
