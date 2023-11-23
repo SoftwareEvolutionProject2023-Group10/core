@@ -34,6 +34,7 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
         config_entry.async_on_unload(
             config_entry.add_update_listener(self._on_config_entry_update)
         )
+        config_entry.async_on_unload(self.async_turn_off)
 
     async def _on_config_entry_update(
         self, hass: HomeAssistant, config_entry: ConfigEntry

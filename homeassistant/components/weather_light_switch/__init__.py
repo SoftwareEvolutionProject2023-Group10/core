@@ -95,6 +95,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unregister a weather switch entity."""
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_unload(entry, Platform.SWITCH)
+    )
+    return True
+
+
 def calculate_brightness(temperature) -> int:
     """Define the brightness base of temperature in the range of 0-100."""
     if temperature is None:

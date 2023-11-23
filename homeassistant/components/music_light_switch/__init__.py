@@ -17,3 +17,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_setups(entry, [Platform.SWITCH])
     )
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unregister a music switch entity."""
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_unload(entry, Platform.SWITCH)
+    )
+    return True
