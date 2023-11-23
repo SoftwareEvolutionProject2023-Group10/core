@@ -96,6 +96,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 def calculate_brightness(temperature) -> int:
     """Define the brightness base of temperature in the range of 0-100."""
+    if temperature is None:
+        return 255
+
     min_temp = -20  # Minimum temperature
     max_temp = 40  # Maximum temperature
 
