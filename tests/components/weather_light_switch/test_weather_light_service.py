@@ -1,4 +1,5 @@
 """File for test weather light service."""
+
 from homeassistant.components.weather_light_switch.weather_mapping import (
     get_color_for_weather_state,
     rgb_to_hs,
@@ -31,3 +32,12 @@ async def test_colors():
 
         actual_color = get_color_for_weather_state(weather_state)
         assert actual_color == expected_color_hs
+
+
+async def test_invalid_weather_state():
+    """Test behavior for an invalid weather state."""
+    invalid_state = "unknown_weather_state"
+    expected_default_color = (0, 0, 0)  # Assuming default color for unknown state
+
+    actual_color = get_color_for_weather_state(invalid_state)
+    assert actual_color == rgb_to_hs(expected_default_color)
