@@ -9,7 +9,13 @@ from homeassistant.components.weather_light_switch.weather_mapping import (
     get_color_for_weather_state,
     rgb_to_hs,
 )
-from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_ON, STATE_OFF, STATE_ON
+from homeassistant.const import (
+    ATTR_ENTITY_ID,
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    STATE_OFF,
+    STATE_ON,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 
@@ -72,10 +78,12 @@ async def test_weather_changes(hass: HomeAssistant):
     weather_service_calls = async_mock_service(hass, SWITCH_DOMAIN, WEATHER_SERVICE)
     await hass.async_block_till_done()
 
+    # If the switch is off, weather changes do not trigger the weather service
     assert hass.states.get(SWITCH_ENTITY_ID).state == STATE_OFF
     hass.states.async_set(WEATHER_ENTITY_ID, "cloudy")
     assert len(weather_service_calls) == 0
 
+    # Turn the switch on (also triggers the weather service)
     await hass.services.async_call(
         SWITCH_DOMAIN,
         SERVICE_TURN_ON,
@@ -84,7 +92,22 @@ async def test_weather_changes(hass: HomeAssistant):
     )
     assert len(weather_service_calls) == 1
 
+    # If the switch is on, weather changes trigger the weather service
     hass.states.async_set(WEATHER_ENTITY_ID, "rainy")
+    await hass.async_block_till_done()
+    assert len(weather_service_calls) == 2
+
+    # Turn the switch off again
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_OFF,
+        {ATTR_ENTITY_ID: SWITCH_ENTITY_ID},
+        blocking=True,
+    )
+    assert len(weather_service_calls) == 2
+
+    # If the switch is off, weather changes do not trigger the weather service
+    hass.states.async_set(WEATHER_ENTITY_ID, "sunny")
     await hass.async_block_till_done()
     assert len(weather_service_calls) == 2
 
