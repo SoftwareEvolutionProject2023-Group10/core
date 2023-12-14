@@ -6,6 +6,7 @@ from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.components.weather_light_switch import async_setup_entry
 from homeassistant.components.weather_light_switch.const import DOMAIN, WEATHER_SERVICE
 from homeassistant.components.weather_light_switch.weather_mapping import (
+    calculate_brightness,
     get_color_for_weather_state,
     rgb_to_hs,
 )
@@ -55,6 +56,23 @@ async def test_invalid_weather_state():
 
     actual_color = get_color_for_weather_state(invalid_state)
     assert actual_color == rgb_to_hs(expected_default_color)
+
+
+async def test_temperature():
+    """Test that different temperatures corresponds to a certain brightness."""
+    test_cases = [
+        {"temperature": -40, "expected_brightness": 255},
+        {"temperature": -10, "expected_brightness": 212},
+        {"temperature": 10, "expected_brightness": 127},
+        {"temperature": 40, "expected_brightness": 0},
+    ]
+
+    for test_cases in test_cases:
+        temperature = test_cases["temperature"]
+        expected_brightness = test_cases["expected_brightness"]
+
+        actual_brightness = calculate_brightness(temperature)
+        assert actual_brightness == expected_brightness
 
 
 async def test_weather_changes(hass: HomeAssistant):
