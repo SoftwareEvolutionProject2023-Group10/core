@@ -1,19 +1,24 @@
 """File for test weather light service."""
 
-from homeassistant import config_entries
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
-from homeassistant.components.weather_light_switch import async_setup_entry
 from homeassistant.components.weather_light_switch.const import DOMAIN, WEATHER_SERVICE
 from homeassistant.components.weather_light_switch.weather_mapping import (
+    calculate_brightness,
     get_color_for_weather_state,
     rgb_to_hs,
 )
-from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_ON, STATE_OFF, STATE_ON
+from homeassistant.const import (
+    ATTR_ENTITY_ID,
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    STATE_OFF,
+    STATE_ON,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 
-from tests.common import async_mock_service
+from tests.common import MockConfigEntry, async_mock_service
 
 
 async def test_has_weather_service(hass: HomeAssistant):
@@ -51,6 +56,23 @@ async def test_invalid_weather_state():
     assert actual_color == rgb_to_hs(expected_default_color)
 
 
+async def test_temperature():
+    """Test that different temperatures corresponds to a certain brightness."""
+    test_cases = [
+        {"temperature": -40, "expected_brightness": 255},
+        {"temperature": -10, "expected_brightness": 212},
+        {"temperature": 10, "expected_brightness": 127},
+        {"temperature": 40, "expected_brightness": 0},
+    ]
+
+    for test_cases in test_cases:
+        temperature = test_cases["temperature"]
+        expected_brightness = test_cases["expected_brightness"]
+
+        actual_brightness = calculate_brightness(temperature)
+        assert actual_brightness == expected_brightness
+
+
 async def test_weather_changes(hass: HomeAssistant):
     """Test that the weather service is called on weather changes."""
     await async_setup_component(hass, DOMAIN, {})
@@ -58,24 +80,22 @@ async def test_weather_changes(hass: HomeAssistant):
     WEATHER_ENTITY_ID = "weather.test"
     hass.states.async_set(WEATHER_ENTITY_ID, "sunny")
 
-    config_entry = config_entries.ConfigEntry(
-        1,
-        DOMAIN,
-        "Mock Title",
-        {},
-        "test",
+    config_entry = MockConfigEntry(
+        domain=DOMAIN,
         options={"weather_entity_id": WEATHER_ENTITY_ID, "light_ids": []},
     )
-    await async_setup_entry(hass, config_entry)
+    await hass.config_entries.async_add(config_entry)
     SWITCH_ENTITY_ID = "switch.weather_light_switch_enabled"
 
     weather_service_calls = async_mock_service(hass, SWITCH_DOMAIN, WEATHER_SERVICE)
     await hass.async_block_till_done()
 
+    # If the switch is off, weather changes do not trigger the weather service
     assert hass.states.get(SWITCH_ENTITY_ID).state == STATE_OFF
     hass.states.async_set(WEATHER_ENTITY_ID, "cloudy")
     assert len(weather_service_calls) == 0
 
+    # Turn the switch on (also triggers the weather service)
     await hass.services.async_call(
         SWITCH_DOMAIN,
         SERVICE_TURN_ON,
@@ -84,7 +104,22 @@ async def test_weather_changes(hass: HomeAssistant):
     )
     assert len(weather_service_calls) == 1
 
+    # If the switch is on, weather changes trigger the weather service
     hass.states.async_set(WEATHER_ENTITY_ID, "rainy")
+    await hass.async_block_till_done()
+    assert len(weather_service_calls) == 2
+
+    # Turn the switch off again
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_OFF,
+        {ATTR_ENTITY_ID: SWITCH_ENTITY_ID},
+        blocking=True,
+    )
+    assert len(weather_service_calls) == 2
+
+    # If the switch is off, weather changes do not trigger the weather service
+    hass.states.async_set(WEATHER_ENTITY_ID, "sunny")
     await hass.async_block_till_done()
     assert len(weather_service_calls) == 2
 
@@ -98,19 +133,15 @@ async def test_light_change(hass: HomeAssistant):
     hass.states.async_set(WEATHER_ENTITY_ID, WEATHER_CONDITION)
 
     LIGHT_ENTITY_ID = "light.test"
-    config_entry = config_entries.ConfigEntry(
-        1,
-        DOMAIN,
-        "Mock Title",
-        {},
-        "test",
+    config_entry = MockConfigEntry(
+        domain=DOMAIN,
         options={
             "weather_entity_id": WEATHER_ENTITY_ID,
             "light_ids": [LIGHT_ENTITY_ID],
         },
     )
 
-    await async_setup_entry(hass, config_entry)
+    await hass.config_entries.async_add(config_entry)
     SWITCH_ENTITY_ID = "switch.weather_light_switch_enabled"
 
     light_service_calls = async_mock_service(hass, LIGHT_DOMAIN, SERVICE_TURN_ON)
@@ -160,19 +191,15 @@ async def test_config_entry_update(hass: HomeAssistant):
 
     WEATHER_ENTITY_ID = "weather.test1"
     LIGHT_ENTITY_ID = "light.test1"
-    config_entry = config_entries.ConfigEntry(
-        1,
-        DOMAIN,
-        "Mock Title",
-        {},
-        "test",
+    config_entry = MockConfigEntry(
+        domain=DOMAIN,
         options={
             "weather_entity_id": WEATHER_ENTITY_ID,
             "light_ids": [LIGHT_ENTITY_ID],
         },
     )
 
-    await async_setup_entry(hass, config_entry)
+    await hass.config_entries.async_add(config_entry)
     SWITCH_ENTITY_ID = "switch.weather_light_switch_enabled"
 
     weather_service_calls = async_mock_service(hass, SWITCH_DOMAIN, WEATHER_SERVICE)
