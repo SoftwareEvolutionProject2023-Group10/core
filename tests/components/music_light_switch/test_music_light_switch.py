@@ -45,7 +45,6 @@ async def test_song_changes(hass: HomeAssistant):
         "homeassistant.components.demo.media_player.DemoMusicPlayer.async_get_media_image",
         return_value=(load_test_image(), "image/png"),
     ):
-        await async_setup_component(hass, "homeassistant", {})
         await async_setup_component(
             hass, "media_player", {"media_player": {"platform": "demo"}}
         )
