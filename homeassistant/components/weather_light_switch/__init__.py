@@ -13,7 +13,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN, WEATHER_SERVICE
 from .switch import WeatherLightSwitchEnabledEntity
-from .weather_mapping import get_color_for_weather_state
+from .weather_mapping import calculate_brightness, get_color_for_weather_state
 
 CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
@@ -104,22 +104,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_forward_entry_unload(entry, Platform.SWITCH)
     )
     return True
-
-
-def calculate_brightness(temperature) -> int:
-    """Define the brightness base of temperature in the range of 0-100."""
-    if temperature is None:
-        return 255
-
-    min_temp = -20  # Minimum temperature
-    max_temp = 40  # Maximum temperature
-
-    # Normalize the temperature within the range
-    normalized_temp = 1 - (temperature - min_temp) / (max_temp - min_temp)
-
-    brightness = normalized_temp * 255
-
-    # 0 to 100
-    brightness = max(0, min(brightness, 255))
-
-    return int(brightness)
