@@ -36,8 +36,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 else "windy"
             )
 
-            # Want to add weather_state.attributes.get("temperature") but confused of the weather_type thingy :)
-            temperature = None
+            temperature = (
+                weather_state.attributes.get("temperature")
+                if weather_state is not None and call.data.get("main") is None
+                else None
+            )
             brightness = calculate_brightness(temperature)
             hs_color = get_color_for_weather_state(weather_type)
 
