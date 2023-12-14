@@ -115,11 +115,11 @@ def calculate_brightness(temperature) -> int:
     max_temp = 40  # Maximum temperature
 
     # Normalize the temperature within the range
-    normalized_temp = (temperature - min_temp) / (max_temp - min_temp)
+    normalized_temp = 1 - (temperature - min_temp) / (max_temp - min_temp)
 
-    brightness = normalized_temp * 100
+    brightness = normalized_temp * 255
 
     # 0 to 100
-    brightness = max(0, min(brightness, 100))
+    brightness = max(0, min(brightness, 255))
 
     return int(brightness)
