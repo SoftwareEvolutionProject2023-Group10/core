@@ -69,11 +69,8 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
 
         image = await media_player.async_get_media_image()
         image_bytes = image[0]
-        if image_bytes is None:
-            return
 
-        color_thief = ColorThief(io.BytesIO(image_bytes))
-        dominant_color = color_thief.get_color(quality=5)
+        dominant_color = color_extractor(image_bytes)
 
         for light_id in self.light_ids:
             await self.hass.services.async_call(
@@ -120,3 +117,13 @@ async def async_setup_entry(
 ) -> None:
     """Set up light entities."""
     async_add_entities([MusicLightSwitchEnabledEntity(config_entry)])
+
+
+def color_extractor(image_bytes):
+    """Extract color from image."""
+    if image_bytes is None:
+        return
+
+    color_thief = ColorThief(io.BytesIO(image_bytes))
+    dominant_color = color_thief.get_color(quality=5)
+    return dominant_color
