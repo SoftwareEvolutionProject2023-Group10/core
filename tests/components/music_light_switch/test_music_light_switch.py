@@ -1,4 +1,5 @@
 """Tests for the music light switch."""
+import pathlib
 from unittest.mock import patch
 
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
@@ -20,7 +21,7 @@ from tests.components.media_player.common import async_media_next_track
 
 def load_test_image():
     """Load a monochromatic test image."""
-    with open("testimage.png", "rb") as image_file:
+    with open(pathlib.Path(__file__).parent / "testimage.png", "rb") as image_file:
         image = image_file.read()
         return image
 
