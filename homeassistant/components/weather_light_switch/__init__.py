@@ -24,18 +24,18 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async def _weather_service_call(
         switch_entity: WeatherLightSwitchEnabledEntity, call: ServiceCall
     ) -> ServiceResponse:
+        weather_state = hass.states.get(switch_entity.weather_entity_id)
+
+        # Case 1: We take the hardcoded, 2: We get it from the weather entity, 3: We say its windy
+        weather_type = (
+            call.data["main"]
+            if call.data.get("main") is not None
+            else weather_state.state
+            if weather_state and weather_state.state is not None
+            else "windy"
+        )
+
         if switch_entity.is_on:
-            weather_state = hass.states.get(switch_entity.weather_entity_id)
-
-            # Case 1: We take the hardcoded, 2: We get it from the weather entity, 3: We say its windy
-            weather_type = (
-                call.data["main"]
-                if call.data.get("main") is not None
-                else weather_state.state
-                if weather_state and weather_state.state is not None
-                else "windy"
-            )
-
             temperature = (
                 weather_state.attributes.get("temperature")
                 if weather_state is not None and call.data.get("main") is None
