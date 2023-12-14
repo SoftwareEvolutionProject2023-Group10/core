@@ -1,11 +1,18 @@
 """File for test weather light service."""
 
+from homeassistant import config_entries
+from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
+from homeassistant.components.weather_light_switch import async_setup_entry
+from homeassistant.components.weather_light_switch.const import DOMAIN, WEATHER_SERVICE
 from homeassistant.components.weather_light_switch.weather_mapping import (
     get_color_for_weather_state,
     rgb_to_hs,
 )
+from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_ON, STATE_OFF
 from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
+
+from tests.common import async_mock_service
 
 
 async def test_has_weather_service(hass: HomeAssistant):
@@ -41,3 +48,41 @@ async def test_invalid_weather_state():
 
     actual_color = get_color_for_weather_state(invalid_state)
     assert actual_color == rgb_to_hs(expected_default_color)
+
+
+async def test_weather_changes(hass: HomeAssistant):
+    """Test that the weather service is called on weather changes."""
+    await async_setup_component(hass, DOMAIN, {})
+
+    WEATHER_ENTITY_ID = "weather.test"
+    hass.states.async_set(WEATHER_ENTITY_ID, "sunny")
+
+    config_entry = config_entries.ConfigEntry(
+        1,
+        DOMAIN,
+        "Mock Title",
+        {},
+        "test",
+        options={"weather_entity_id": WEATHER_ENTITY_ID, "light_ids": []},
+    )
+    await async_setup_entry(hass, config_entry)
+    SWITCH_ENTITY_ID = "switch.weather_light_switch_enabled"
+
+    weather_service_calls = async_mock_service(hass, SWITCH_DOMAIN, WEATHER_SERVICE)
+    await hass.async_block_till_done()
+
+    assert hass.states.get(SWITCH_ENTITY_ID).state == STATE_OFF
+    hass.states.async_set(WEATHER_ENTITY_ID, "cloudy")
+    assert len(weather_service_calls) == 0
+
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_ON,
+        {ATTR_ENTITY_ID: SWITCH_ENTITY_ID},
+        blocking=True,
+    )
+    assert len(weather_service_calls) == 1
+
+    hass.states.async_set(WEATHER_ENTITY_ID, "rainy")
+    await hass.async_block_till_done()
+    assert len(weather_service_calls) == 2
