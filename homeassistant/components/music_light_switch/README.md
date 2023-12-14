@@ -1,0 +1,8 @@
+# Music Light Switch
+As part of the course Software Evolution Project in Chalmers/Gothenburg University, we have extended the Hue Light integration in Home Assistant. Philips Hue Lights are known for their vast options to change their lights depending on different scenarios to create different moods. However, in Home Assistant these features are limited. We provide an additional way of automating your lights depending on your environment. This is to give a user more options to customize their Hue Lights to their satisfaction. We have also created another feature found in  `/components/weather_light_switch`
+
+### Feature
+Make the Hue Lights change depending on what song you are listening to on your media player. The colour will match the cover art of the song.
+
+## Requirements
+Firstly, you need to have a Hue setup at home. From there on you can connect them to [Home Assistant](https://www.home-assistant.io/integrations/hue/). You will also need a media player, an example could be [Spotify](https://www.home-assistant.io/integrations/spotify/). Afterwards, you need  to create the switch that turn on the feature. This is done in the Home Assistant dashboard. Settings --> Devices & services --> Helpers. Here you create a helper using our _Music Light Switch_. Connect the Music Switch to the media player and the light. Now the switch can be added in the dashboard. Turn on the switch to activate the feature
