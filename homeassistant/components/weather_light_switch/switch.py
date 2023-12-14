@@ -18,6 +18,8 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
+from .const import WEATHER_SERVICE
+
 
 class WeatherLightSwitchEnabledEntity(SwitchEntity):
     """Enabled state of a light switcher."""
@@ -53,7 +55,7 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
 
         await self.hass.services.async_call(
             "switch",
-            "weather_service",
+            WEATHER_SERVICE,
             {"entity_id": self.entity_id, "weather_entity_id": self.weather_entity_id},
         )
 

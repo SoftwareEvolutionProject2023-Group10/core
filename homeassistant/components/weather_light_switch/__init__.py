@@ -11,7 +11,7 @@ from homeassistant.core import (
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN
+from .const import DOMAIN, WEATHER_SERVICE
 from .switch import WeatherLightSwitchEnabledEntity
 from .weather_mapping import get_color_for_weather_state
 
@@ -75,7 +75,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Register the service to the 'switch' entity
     hass.data["switch"].async_register_entity_service(
-        name="weather_service",
+        name=WEATHER_SERVICE,
         func=_weather_service_call,
         schema={
             "main": str,
