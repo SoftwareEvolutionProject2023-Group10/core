@@ -6,6 +6,7 @@ from typing import Any
 
 from colorthief import ColorThief
 
+from homeassistant.components.light import ATTR_RGB_COLOR, DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.media_player import (
     DOMAIN as MEDIA_PLAYER_DOMAIN,
     MediaPlayerEntity,
@@ -17,7 +18,7 @@ from homeassistant.components.switch import (
     SwitchEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_ON, EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant
 from homeassistant.helpers.entity_component import EntityComponent
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -26,6 +27,8 @@ from homeassistant.helpers.event import (
     async_track_state_change_event,
 )
 from homeassistant.helpers.typing import EventType
+
+from .const import LIGHT_IDS, MEDIA_PLAYER_ENTITY_ID
 
 
 class MusicLightSwitchEnabledEntity(SwitchEntity):
@@ -74,9 +77,9 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
 
         for light_id in self.light_ids:
             await self.hass.services.async_call(
-                "light",
-                "turn_on",
-                {"entity_id": light_id, "rgb_color": dominant_color},
+                LIGHT_DOMAIN,
+                SERVICE_TURN_ON,
+                {ATTR_ENTITY_ID: light_id, ATTR_RGB_COLOR: dominant_color},
             )
 
     @property
@@ -102,12 +105,12 @@ class MusicLightSwitchEnabledEntity(SwitchEntity):
     @property
     def media_player_entity_id(self):
         """Getter for media_player_entity_id."""
-        return self._config_entry.options["media_player_entity_id"]
+        return self._config_entry.options[MEDIA_PLAYER_ENTITY_ID]
 
     @property
     def light_ids(self):
         """Getter for light_ids."""
-        return self._config_entry.options["light_ids"]
+        return self._config_entry.options[LIGHT_IDS]
 
 
 async def async_setup_entry(

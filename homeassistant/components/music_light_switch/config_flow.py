@@ -12,7 +12,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import DOMAIN
+from .const import DOMAIN, LIGHT_IDS, MEDIA_PLAYER_ENTITY_ID
 
 CONF_MEDIA_PLAYER = "media_player"
 
@@ -25,7 +25,7 @@ def _dataSchema(defaults=None):
         {
             vol.Required(
                 CONF_MEDIA_PLAYER,
-                default=defaults.get("media_player_entity_id", ""),
+                default=defaults.get(MEDIA_PLAYER_ENTITY_ID, ""),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=[MEDIA_PLAYER_DOMAIN],
@@ -33,7 +33,7 @@ def _dataSchema(defaults=None):
             ),
             vol.Required(
                 CONF_LIGHTS,
-                default=defaults.get("light_ids", []),
+                default=defaults.get(LIGHT_IDS, []),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=[LIGHT_DOMAIN],
@@ -58,8 +58,8 @@ class MusicLightSwitchOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(
                 data={
-                    "media_player_entity_id": user_input.get(CONF_MEDIA_PLAYER),
-                    "light_ids": user_input.get(CONF_LIGHTS),
+                    MEDIA_PLAYER_ENTITY_ID: user_input.get(CONF_MEDIA_PLAYER),
+                    LIGHT_IDS: user_input.get(CONF_LIGHTS),
                 },
             )
 
@@ -97,8 +97,8 @@ class MusicLightSwitchFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 title="Music light switch",
                 data={},
                 options={
-                    "media_player_entity_id": user_input.get(CONF_MEDIA_PLAYER),
-                    "light_ids": user_input.get(CONF_LIGHTS),
+                    MEDIA_PLAYER_ENTITY_ID: user_input.get(CONF_MEDIA_PLAYER),
+                    LIGHT_IDS: user_input.get(CONF_LIGHTS),
                 },
             )
 

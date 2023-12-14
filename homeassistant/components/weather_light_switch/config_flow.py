@@ -12,7 +12,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import DOMAIN
+from .const import DOMAIN, LIGHT_IDS, WEATHER_ENTITY_ID
 
 CONF_WEATHER = "weather_service"
 
@@ -25,7 +25,7 @@ def _dataSchema(defaults=None):
         {
             vol.Required(
                 CONF_WEATHER,
-                default=defaults.get("weather_entity_id", ""),
+                default=defaults.get(WEATHER_ENTITY_ID, ""),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=[WEATHER_DOMAIN],
@@ -33,7 +33,7 @@ def _dataSchema(defaults=None):
             ),
             vol.Required(
                 CONF_LIGHTS,
-                default=defaults.get("light_ids", []),
+                default=defaults.get(LIGHT_IDS, []),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain=[LIGHT_DOMAIN],
@@ -58,8 +58,8 @@ class WeatherLightSwitchOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(
                 data={
-                    "weather_entity_id": user_input.get(CONF_WEATHER),
-                    "light_ids": user_input.get(CONF_LIGHTS),
+                    WEATHER_ENTITY_ID: user_input.get(CONF_WEATHER),
+                    LIGHT_IDS: user_input.get(CONF_LIGHTS),
                 },
             )
 
@@ -97,8 +97,8 @@ class WeatherLightSwitchFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 title="Weather light switch",
                 data={},
                 options={
-                    "weather_entity_id": user_input.get(CONF_WEATHER),
-                    "light_ids": user_input.get(CONF_LIGHTS),
+                    WEATHER_ENTITY_ID: user_input.get(CONF_WEATHER),
+                    LIGHT_IDS: user_input.get(CONF_LIGHTS),
                 },
             )
 

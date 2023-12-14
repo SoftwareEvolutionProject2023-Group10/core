@@ -9,7 +9,7 @@ from homeassistant.components.switch import (
     SwitchEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import ATTR_ENTITY_ID, EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import (
@@ -18,7 +18,7 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.typing import EventType
 
-from .const import WEATHER_SERVICE
+from .const import LIGHT_IDS, WEATHER_ENTITY_ID, WEATHER_SERVICE
 
 
 class WeatherLightSwitchEnabledEntity(SwitchEntity):
@@ -54,9 +54,9 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
         """Call back for update of the weather."""
 
         await self.hass.services.async_call(
-            "switch",
+            SWITCH_DOMAIN,
             WEATHER_SERVICE,
-            {"entity_id": self.entity_id, "weather_entity_id": self.weather_entity_id},
+            {ATTR_ENTITY_ID: self.entity_id, WEATHER_ENTITY_ID: self.weather_entity_id},
         )
 
     @property
@@ -82,12 +82,12 @@ class WeatherLightSwitchEnabledEntity(SwitchEntity):
     @property
     def weather_entity_id(self):
         """Getter for weather_entity_id."""
-        return self._config_entry.options["weather_entity_id"]
+        return self._config_entry.options[WEATHER_ENTITY_ID]
 
     @property
     def light_ids(self):
         """Getter to get all light ids."""
-        return self._config_entry.options["light_ids"]
+        return self._config_entry.options[LIGHT_IDS]
 
 
 async def async_setup_entry(
